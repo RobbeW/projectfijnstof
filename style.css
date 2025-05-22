@@ -1,0 +1,20 @@
+:root {
+  --color-primary: #5200FF;
+  --color-secondary: #00FF99;
+  --color-bg: #F9F8FC;
+  --color-text: #110C1D;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.debug-bar {
+  font-size: 0.9rem;
+}
+
+/* Modal toggling */
+#report-modal.flex { display: flex; }
