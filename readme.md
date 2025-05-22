@@ -3,6 +3,8 @@
 **Auteur:** Robbe Wulgaert · [aiindeklas.be](http://aiindeklas.be) / [robbewulgaert.be](http://robbewulgaert.be)
 **© 2025 Robbe Wulgaert**
 
+Demo: [klik hier!](https://robbew.github.io/projectfijnstof/)
+
 ---
 
 ## 🎯 Doel
