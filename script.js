@@ -176,30 +176,57 @@ const formatDate = date => {
 };
 const formattedDate = formatDate(startTime || new Date());
 doc.text(`Datum: ${formattedDate}`, 14, 30);
-
-// En zorg dat de volgende regels ongewijzigd volgen:
 doc.text(`Duur (min): ${duration}`, 14, 36);
 doc.text(`Studenten: ${names}`, 14, 42);
 // Titel Onderzoeksvraag
 doc.text('Onderzoeksvraag:', 14, 48);
-// De eigenlijke vraag, automatisch gewrapt
-doc.text(question, 14, 54, { maxWidth: 180 });
+const startY = 54;
+// Vraag automatisch wrappen en tekenen
+const vraagRegels = doc.splitTextToSize(question, 180);
+doc.text(vraagRegels, 14, startY);
+
+// Bereken de y-positie ná de vraag
+let y = startY + vraagRegels.length * 7 + 10; // 7pt per regel + 10pt extra ruimte
+
+// Titel Gemiddelden
 doc.setFontSize(12);
-doc.setLineHeightFactor(1.5);  // 1.0 is standaard, 1.5 is 50% meer ruimte
-    const yAfterQuestion = 54 + doc.getTextDimensions(question).h + 6;
-    doc.text('Gemiddelden:', 14, yAfterQuestion);
-    doc.text(`• PM1: ${avg(pm1s)} µg/m³`,18,66);
-    doc.text(`• PM2.5: ${avg(pm25s)} µg/m³`,18,72);
-    doc.text(`• PM10: ${avg(pm10s)} µg/m³`,18,78);
-    doc.text(`• AQI: ${avg(aqis)}`,18,84);
-    doc.addPage();
-    doc.text('Ruwe meetdata',14,20);
-    doc.autoTable({ startY:26, head:[['Tijd','PM1','PM2.5','PM10','AQI']], body: measurementData.map(d=>[
-      new Date(d.timestamp).toLocaleTimeString(), d.pm1.toFixed(1), d.pm25.toFixed(1), d.pm10.toFixed(1), d.aqi.toString()
-    ]), styles:{fontSize:10} });
-    doc.save('Luchtkwaliteitsrapport.pdf');
-    modal.classList.add('hidden');
-  }
+doc.text('Gemiddelden:', 14, y);
+
+// Ruimte vóór de eerste regel
+y += 12;
+
+// De feitelijke gemiddelden
+const avgLines = [
+  `• PM1: ${avg(pm1s)} µg/m³`,
+  `• PM2.5: ${avg(pm25s)} µg/m³`,
+  `• PM10: ${avg(pm10s)} µg/m³`,
+  `• AQI: ${avg(aqis)}`
+];
+
+avgLines.forEach(line => {
+  doc.text(line, 18, y);
+  y += 12;  // 12pt spacing tussen regels
+});
+
+// Nieuwe pagina voor ruwe data
+doc.addPage();
+doc.text('Ruwe meetdata', 14, 20);
+doc.autoTable({
+  startY: 26,
+  head: [['Tijd', 'PM1', 'PM2.5', 'PM10', 'AQI']],
+  body: measurementData.map(d => [
+    new Date(d.timestamp).toLocaleTimeString(),
+    d.pm1.toFixed(1),
+    d.pm25.toFixed(1),
+    d.pm10.toFixed(1),
+    d.aqi.toString()
+  ]),
+  styles: { fontSize: 10 }
+});
+
+// PDF opslaan en modal sluiten
+doc.save('Luchtkwaliteitsrapport.pdf');
+modal.classList.add('hidden');
 
   // —— Bind Events ——
   btnConnect.addEventListener('click', connectArduino);
