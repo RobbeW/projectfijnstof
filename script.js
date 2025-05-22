@@ -180,9 +180,13 @@ doc.text(`Datum: ${formattedDate}`, 14, 30);
 // En zorg dat de volgende regels ongewijzigd volgen:
 doc.text(`Duur (min): ${duration}`, 14, 36);
 doc.text(`Studenten: ${names}`, 14, 42);
-doc.text(`Onderzoeksvraag: ${question}`, 14, 48);
+// Titel Onderzoeksvraag
+doc.text('Onderzoeksvraag:', 14, 48);
+// De eigenlijke vraag, automatisch gewrapt
+doc.text(question, 14, 54, { maxWidth: 180 });
 
-    doc.text('Gemiddelden:',14,60);
+    const yAfterQuestion = 54 + doc.getTextDimensions(question).h + 6;
+    doc.text('Gemiddelden:', 14, yAfterQuestion);
     doc.text(`• PM1: ${avg(pm1s)} µg/m³`,18,66);
     doc.text(`• PM2.5: ${avg(pm25s)} µg/m³`,18,72);
     doc.text(`• PM10: ${avg(pm10s)} µg/m³`,18,78);
