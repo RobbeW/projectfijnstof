@@ -88,7 +88,4 @@ Alle rechten voorbehouden.
 ```
 
 Niet-herdistribueren zonder schriftelijke toestemming van de auteur.
-
----
-
-*Veel succes met jullie STEM-project!*
+Bij gebruik in de eigen klas: naamsvermelding auteur en Sint-Lievenscollege. 
