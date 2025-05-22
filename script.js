@@ -184,7 +184,8 @@ doc.text(`Studenten: ${names}`, 14, 42);
 doc.text('Onderzoeksvraag:', 14, 48);
 // De eigenlijke vraag, automatisch gewrapt
 doc.text(question, 14, 54, { maxWidth: 180 });
-
+doc.setFontSize(12);
+doc.setLineHeightFactor(1.5);  // 1.0 is standaard, 1.5 is 50% meer ruimte
     const yAfterQuestion = 54 + doc.getTextDimensions(question).h + 6;
     doc.text('Gemiddelden:', 14, yAfterQuestion);
     doc.text(`• PM1: ${avg(pm1s)} µg/m³`,18,66);
