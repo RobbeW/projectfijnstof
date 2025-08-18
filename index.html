@@ -22,6 +22,72 @@
       --color-bg: #F9F8FC;
       --color-text: #110C1D;
     }
+
+/* Thema-variabelen en donker-modus (uitbreiding) ===== */
+:root{
+  /* Merk (reeds aanwezig, hier nogmaals voor volledigheid) */
+  --color-primary:   #5200FF;
+  --color-secondary: #00FF99;
+
+  /* Thema (licht) */
+  --color-bg:        #F9F8FC;
+  --color-text:      #110C1D;
+  --color-surface:   #FFFFFF;   /* panelen/kaarten/modals/canvas */
+  --color-surface-2: #EBE6F4;   /* lichte knoppen/achtergrond */
+  --color-border:    #d6cdea;   /* kaart-randen */
+
+  /* Grafiek (labels/raster) */
+  --chart-grid:      #cfcbdc;
+  --chart-label:     #000000;
+}
+
+/* Donkere modus: pas variabelen aan op body.dark zodat alles erft */
+body.dark{
+  --color-bg:        #161820;
+  --color-text:      #FFFFFF;
+  --color-surface:   #23272e;
+  --color-surface-2: #2b303b;
+  --color-border:    #3a3f4a;
+
+  --chart-grid:      #3a3f4a;
+  --chart-label:     #e7e7e7;
+}
+
+/* Map basis op variabelen (body heeft Tailwind vars al, dit vult aan) */
+body{ background: var(--color-bg); color: var(--color-text); }
+
+/* Kaarten en modal volgen surface/border kleuren (via helper classes) */
+.card{
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text);
+}
+.modal-card{
+  background: var(--color-surface) !important;
+  color: var(--color-text);
+}
+
+/* Canvas krijgt een subtiele rand & achtergrond zodat dark mode leesbaar is */
+.chart-canvas{
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+/* Footer-tekst in thema-kleur */
+.footer-text{ color: var(--color-text); opacity: .9; }
+
+/* Debug bar blijft leesbaar; linkerkant al paars via bg-[var(...)] in HTML */
+#debug-bar{ border-top: 1px solid #00000014; }
+
+/* Thema-knop in header (we gebruiken de knop die je net toevoegde) */
+#btn-theme{
+  /* basisstijl via Tailwind classes in HTML; hier enkel dark-randje */
+}
+body.dark #btn-theme{
+  border: 1px solid #ffffff33;
+}
+  
   </style>
 
   <!-- Eigen CSS -->
@@ -38,10 +104,23 @@
 <body class="flex min-h-screen flex-col bg-[var(--color-bg)] text-[var(--color-text)] font-['Roboto']">
 
   <!-- Header -->
-  <header class="bg-[var(--color-primary)] text-white px-6 md:px-10 py-4 flex items-center justify-between">
-    <h1 class="text-2xl md:text-3xl font-black">Interactieve Luchtkwaliteitsmeter</h1>
-    <a href="https://chatgpt.com/g/g-67caf6f8eb688191abd7f722ffcb2979-professor-dusty" target="_blank" class="bg-white text-[var(--color-primary)] font-bold px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] active:scale-95 transition">Stel vragen aan Professor Dusty (AI)</a>
-  </header>
+<header class="bg-[var(--color-primary)] text-white px-6 md:px-10 py-4 flex items-center justify-between">
+  <h1 class="text-2xl md:text-3xl font-black">Interactieve Luchtkwaliteitsmeter</h1>
+
+  <!-- Rechts: thema-toggle + AI-link -->
+  <div class="flex items-center gap-3">
+    <!-- NL: Thema-toggle (donker/licht) -->
+    <button id="btn-theme"
+            class="rounded-full w-10 h-10 flex items-center justify-center bg-white/95 text-[var(--color-primary)] font-bold shadow focus:outline-none focus:ring-2 focus:ring-white/80 active:scale-95 transition"
+            aria-pressed="false" title="Wissel thema">🌙</button>
+
+    <a href="https://chatgpt.com/g/g-67caf6f8eb688191abd7f722ffcb2979-professor-dusty"
+       target="_blank"
+       class="bg-white text-[var(--color-primary)] font-bold px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white/80 active:scale-95 transition">
+       Stel vragen aan Professor Dusty (AI)
+    </a>
+  </div>
+</header>
 
   <!-- Controls -->
   <div class="flex flex-wrap gap-3 px-6 md:px-10 py-4">
@@ -52,9 +131,9 @@
   </div>
 
   <!-- Debug bar -->
-  <div id="debug-bar" class="$1 hidden">
-    PM1: -- µg/m³ | PM2.5: -- µg/m³ | PM10: -- µg/m³ | AQI: --
-  </div>
+<div id="debug-bar" class="hidden px-6 md:px-10 py-2 text-sm bg-[var(--color-primary)] text-white/95">
+  PM1: -- µg/m³ | PM2.5: -- µg/m³ | PM10: -- µg/m³ | AQI: --
+</div>
 
   <!-- Cards + Chart -->
   <main class="px-6 md:px-10 flex-1">
@@ -96,17 +175,17 @@
         <span class="text-sm">AQI</span>
       </div>
     </div>
-    <canvas id="aqi-chart" width="800" height="300" class="w-full h-72 mb-10"></canvas>
+    <canvas id="aqi-chart" width="800" height="300" class="chart-canvas w-full h-72 mb-10"></canvas>
   </main>
 
   <!-- Footer -->
   <footer class="bg-[var(--color-secondary)] text-center py-4">
-    <p class="text-[#333] text-sm">© 2025 Robbe Wulgaert · AI in de Klas</p>
+    <p class="footer-text text-sm">© 2025 Robbe Wulgaert · AI in de Klas</p>
   </footer>
 
   <!-- Rapport Modal -->
   <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <form id="report-form" class="bg-white rounded-lg p-6 w-11/12 max-w-md">
+    <form id="report-form" class="modal-card bg-white rounded-lg p-6 w-11/12 max-w-md">
       <h3 class="text-lg font-bold mb-4">Rapportgegevens</h3>
       <label class="block mb-2">
         <span>Aantal studenten</span>
@@ -126,6 +205,72 @@
       </div>
     </form>
   </div>
+
+  <script>
+// ===== NL: Thema-besturing (donker/licht) voor Luchtkwaliteitsmeter =====
+(function(){
+  const THEME_KEY = 'aqi-theme';
+  const btn = document.getElementById('btn-theme');
+
+  // (Optioneel) SmoothieChart referentie opslaan zodat we labels/raster kunnen stylen
+  // Gebruik in je eigen script.js na het maken van de chart:
+  //   window.__setSmoothieRef && window.__setSmoothieRef(chart);
+  let smoothieRef = null;
+  window.__setSmoothieRef = function(chartInstance){
+    smoothieRef = chartInstance;
+    // Bij registratie meteen huidige thema toepassen
+    applyChartTheme(document.body.classList.contains('dark'));
+  };
+
+  // Pas grafiekkleuren aan (labels/raster) zodat de chart leesbaar blijft
+  function applyChartTheme(isDark){
+    if(!smoothieRef) return;
+    try{
+      const cs = getComputedStyle(document.body);
+      const grid = cs.getPropertyValue('--chart-grid').trim();
+      const labl = cs.getPropertyValue('--chart-label').trim();
+      smoothieRef.options = smoothieRef.options || {};
+      smoothieRef.options.grid   = smoothieRef.options.grid   || {};
+      smoothieRef.options.labels = smoothieRef.options.labels || {};
+      smoothieRef.options.grid.strokeStyle  = grid;
+      smoothieRef.options.labels.fillStyle  = labl;
+      // NB: Datakleuren (series) laat je merkconsistent in je eigen script.js
+      console.log('🎨 (Thema) Smoothie-stijl bijgewerkt:', isDark ? 'donker' : 'licht');
+    }catch(e){
+      console.log('ℹ️ (Thema) Grafiek kon niet worden gestyled:', e);
+    }
+  }
+
+  function setTheme(theme){
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('dark', isDark);
+    localStorage.setItem(THEME_KEY, theme);
+    if (btn){
+      btn.setAttribute('aria-pressed', String(isDark));
+      btn.textContent = isDark ? '☀️' : '🌙';
+    }
+    applyChartTheme(isDark);
+    console.log('🌓 (Thema) Ingesteld op:', theme);
+  }
+
+  function getInitialTheme(){
+    const saved = localStorage.getItem(THEME_KEY);
+    // Standaard: licht, tenzij gebruiker reeds koos
+    return (saved === 'dark' || saved === 'light') ? saved : 'light';
+  }
+
+  // Init
+  setTheme(getInitialTheme());
+
+  // Toggleknop
+  btn && btn.addEventListener('click', ()=>{
+    const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+    setTheme(next);
+  });
+})();
+</script>
+
 </body>
 </html>
+
 
