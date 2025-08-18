@@ -51,21 +51,33 @@ window.addEventListener('DOMContentLoaded', () => {
     return `${d}/${m}/${y}`;
   }
 
-  // Setup SmoothieChart
-  const smoothie = new SmoothieChart({
-    millisPerPixel: 50,
-    interpolation: 'linear',
-    grid: { fillStyle: '#fff', strokeStyle: '#e0e0e0' }
-  });
-  const seriesPM1  = new TimeSeries();
-  const seriesPM25 = new TimeSeries();
-  const seriesPM10 = new TimeSeries();
-  const seriesAQI  = new TimeSeries();
-  smoothie.addTimeSeries(seriesPM1,  { strokeStyle: 'blue',   lineWidth: 2 });
-  smoothie.addTimeSeries(seriesPM25, { strokeStyle: 'red',    lineWidth: 2 });
-  smoothie.addTimeSeries(seriesPM10, { strokeStyle: 'green',  lineWidth: 2 });
-  smoothie.addTimeSeries(seriesAQI,  { strokeStyle: 'purple', lineWidth: 4 });
-  smoothie.streamTo(canvas, 1000);
+ // Setup SmoothieChart (thema-vriendelijk)
+const cs   = getComputedStyle(document.body);
+const GRID = cs.getPropertyValue('--chart-grid').trim()   || '#e0e0e0';
+const LABL = cs.getPropertyValue('--chart-label').trim()  || '#000';
+
+// NL: fillStyle 'transparent' → achtergrond komt van CSS (chart-canvas)
+//     strokeStyle/labels uit CSS-variabelen → meteen goed in donker/licht
+const smoothie = new SmoothieChart({
+  millisPerPixel: 50,
+  interpolation: 'linear',
+  grid:   { fillStyle: 'transparent', strokeStyle: GRID },
+  labels: { fillStyle: LABL }
+});
+
+const seriesPM1  = new TimeSeries();
+const seriesPM25 = new TimeSeries();
+const seriesPM10 = new TimeSeries();
+const seriesAQI  = new TimeSeries();
+
+smoothie.addTimeSeries(seriesPM1,  { strokeStyle: 'blue',   lineWidth: 2 });
+smoothie.addTimeSeries(seriesPM25, { strokeStyle: 'red',    lineWidth: 2 });
+smoothie.addTimeSeries(seriesPM10, { strokeStyle: 'green',  lineWidth: 2 });
+smoothie.addTimeSeries(seriesAQI,  { strokeStyle: 'purple', lineWidth: 4 });
+
+smoothie.streamTo(canvas, 1000);
+
+window.__setSmoothieRef && window.__setSmoothieRef(smoothie);
 
   // Arduino verbinden
   btnConnect.addEventListener('click', async () => {
@@ -195,3 +207,4 @@ window.addEventListener('DOMContentLoaded', () => {
   btnReport.addEventListener('click', () => modal.classList.replace('hidden', 'flex'));
   document.getElementById('btn-cancel').addEventListener('click', () => modal.classList.replace('flex', 'hidden'));
 });
+
