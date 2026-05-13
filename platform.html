@@ -1,0 +1,268 @@
+<!doctype html>
+<!--
+  Project Fijnstof - meetplatform
+  Copyright (c) 2026 Robbe Wulgaert
+-->
+<html lang="nl-BE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fijnstof Platform</title>
+  <meta
+    name="description"
+    content="Meetplatform voor Project Fijnstof met WebSerial, demomodus, meetreeksen, grafieken, CSV-export en PDF-rapportage."
+  />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%235200FF"/><text x="32" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="white">IW</text></svg>' />
+  <link rel="stylesheet" href="style.css" />
+  <script src="vendor/chart.umd.min.js" defer></script>
+  <script src="vendor/jspdf.umd.min.js" defer></script>
+  <script src="vendor/jspdf.plugin.autotable.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body class="app-page">
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Project Fijnstof</p>
+      <h1>Fijnstof Platform</h1>
+    </div>
+    <div class="header-actions">
+      <a class="secondary-button header-link" href="index.html">Startpagina</a>
+      <span id="connection-status" class="status-pill">Niet verbonden</span>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section id="compatibility-notice" class="notice hidden" aria-live="polite"></section>
+
+    <nav class="workflow-nav" aria-label="Onderzoeksstappen">
+      <a href="#prediction" class="workflow-step is-active" data-step-link="prediction">1. Voorspel</a>
+      <a href="#setup" class="workflow-step" data-step-link="setup">2. Bouw</a>
+      <a href="#connect" class="workflow-step" data-step-link="connect">3. Verbind</a>
+      <a href="#measurement" class="workflow-step" data-step-link="measurement">4. Meet</a>
+      <a href="#comparison" class="workflow-step" data-step-link="comparison">5. Vergelijk</a>
+      <a href="#conclusion" class="workflow-step" data-step-link="conclusion">6. Besluit</a>
+    </nav>
+
+    <section id="prediction" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Voorspellen</p>
+        <h2>Wat verwacht je te meten?</h2>
+      </div>
+      <div class="form-grid">
+        <label>
+          Onderzoeksvraag
+          <textarea id="input-question" rows="2" placeholder="Waar verwachten we de hoogste fijnstofwaarde?"></textarea>
+        </label>
+        <label>
+          Hypothese
+          <textarea id="input-hypothesis" rows="2" placeholder="Wij verwachten dat ... omdat ..."></textarea>
+        </label>
+        <label>
+          Meetplek
+          <input id="input-location" type="text" placeholder="Bijv. speelplaats, straatkant, klaslokaal" />
+        </label>
+        <label>
+          Verwachte bron
+          <input id="input-source" type="text" placeholder="Bijv. verkeer, ventilatie, open raam, kaars" />
+        </label>
+      </div>
+    </section>
+
+    <section id="setup" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Bouwen</p>
+        <h2>Controleer de opstelling</h2>
+      </div>
+      <div id="setup-checklist" class="checklist">
+        <label><input type="checkbox" /> Arduino is verbonden met USB.</label>
+        <label><input type="checkbox" /> HM330X-sensor is aangesloten op I2C.</label>
+        <label><input type="checkbox" /> De sensor krijgt voeding en lucht kan vrij binnen.</label>
+        <label><input type="checkbox" /> De correcte Arduino-code staat op het bord.</label>
+      </div>
+    </section>
+
+    <section id="connect" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Verbinden</p>
+        <h2>Arduino of demomodus</h2>
+      </div>
+      <div class="control-panel">
+        <div>
+          <p>
+            Verbind de Arduino via WebSerial. Geen sensor beschikbaar? Start de demomodus en oefen het meetverloop.
+          </p>
+          <div class="toolbar">
+            <button id="btn-connect" class="primary-button" type="button">Verbind Arduino</button>
+            <button id="btn-demo" class="secondary-button" type="button">Start demomodus</button>
+          </div>
+        </div>
+        <div class="diagnostics-panel" aria-live="polite">
+          <h3>Diagnose</h3>
+          <p id="diagnostic-summary">Nog geen data ontvangen.</p>
+          <ul id="diagnostic-list">
+            <li>Verwachte regel: tijd_ms, PM1, PM2.5, PM10, AQI.</li>
+          </ul>
+          <small id="serial-preview">Laatste regel: --</small>
+        </div>
+      </div>
+    </section>
+
+    <section id="measurement" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Meten</p>
+        <h2>Meetreeks</h2>
+      </div>
+      <div class="measurement-grid">
+        <div class="trial-panel">
+          <div class="form-grid compact-grid">
+            <label>
+              Naam meetreeks
+              <input id="input-trial-name" type="text" value="Meting 1" />
+            </label>
+            <label>
+              Omstandigheden
+              <input id="input-condition" type="text" placeholder="Bijv. buiten, binnen, raam open, druk verkeer" />
+            </label>
+            <label>
+              Notitie
+              <input id="input-note" type="text" placeholder="Wat gebeurt er tijdens de meting?" />
+            </label>
+          </div>
+          <div class="toolbar">
+            <button id="btn-new-trial" class="secondary-button" type="button">Nieuwe meetreeks</button>
+            <button id="btn-start" class="primary-button" type="button" disabled>Start meting</button>
+            <button id="btn-stop" class="ghost-button" type="button" disabled>Stop meting</button>
+          </div>
+        </div>
+        <div class="concept-panel">
+          <h3>Wat meten we?</h3>
+          <p><strong>PM</strong> staat voor fijnstofdeeltjes in de lucht. De waarde staat in <strong>µg/m³</strong>: microgram deeltjes per kubieke meter lucht.</p>
+          <p><strong>PM2.5</strong> zijn kleinere deeltjes dan PM10. De <strong>AQI</strong> vat PM2.5 en PM10 samen in één score.</p>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card" data-level="pm1">
+          <span>PM1</span>
+          <strong id="metric-pm1">-- µg/m³</strong>
+        </article>
+        <article class="metric-card" data-level="pm25">
+          <span>PM2.5</span>
+          <strong id="metric-pm25">-- µg/m³</strong>
+        </article>
+        <article class="metric-card" data-level="pm10">
+          <span>PM10</span>
+          <strong id="metric-pm10">-- µg/m³</strong>
+        </article>
+        <article class="metric-card" data-level="aqi">
+          <span>Europese AQI</span>
+          <strong id="metric-aqi">--</strong>
+          <small id="metric-aqi-label">Wacht op data</small>
+        </article>
+      </div>
+
+      <div class="chart-panel">
+        <canvas id="live-chart" aria-label="Live grafiek PM1, PM2.5, PM10 en AQI"></canvas>
+      </div>
+    </section>
+
+    <section id="comparison" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Vergelijken</p>
+        <h2>Meetreeksen naast elkaar</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Meetreeks</th>
+              <th>Plek</th>
+              <th>Duur</th>
+              <th>Gem. PM2.5</th>
+              <th>Max PM2.5</th>
+              <th>Gem. PM10</th>
+              <th>Max AQI</th>
+            </tr>
+          </thead>
+          <tbody id="trial-summary-body">
+            <tr><td colspan="7">Nog geen meetreeks.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-panel comparison-chart-panel">
+        <canvas id="comparison-chart" aria-label="Vergelijkende grafiek per meetreeks"></canvas>
+      </div>
+      <div class="table-actions">
+        <button id="btn-export-csv" class="secondary-button" type="button">Exporteer CSV</button>
+      </div>
+    </section>
+
+    <section id="data" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Data</p>
+        <h2>Recente meetpunten</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>t</th>
+              <th>PM1</th>
+              <th>PM2.5</th>
+              <th>PM10</th>
+              <th>AQI</th>
+            </tr>
+          </thead>
+          <tbody id="sample-body">
+            <tr><td colspan="5">Nog geen data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="conclusion" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Besluiten</p>
+        <h2>Besluit en reflectie</h2>
+      </div>
+      <div class="form-grid">
+        <label>
+          Besluit
+          <textarea id="input-conclusion" rows="3" placeholder="Onze meting toont dat ..."></textarea>
+        </label>
+        <label>
+          Reflectie
+          <textarea id="input-reflection" rows="3" placeholder="Wat zou je bij een volgende meting aanpassen?"></textarea>
+        </label>
+      </div>
+      <div class="table-actions report-actions">
+        <button id="btn-report" class="primary-button" type="button" disabled>Genereer PDF</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="report-modal" class="report-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+    <form id="report-form" class="report-modal">
+      <button id="btn-cancel-report" class="close-button" type="button" aria-label="Sluit rapportvenster">x</button>
+      <p class="eyebrow">Rapport</p>
+      <h2 id="report-modal-title">Wie maakt dit rapport?</h2>
+      <label>
+        Naam of namen
+        <input id="report-names" type="text" placeholder="Bijv. Noor, Adam en Lina" required />
+      </label>
+      <label>
+        Klas
+        <input id="report-class" type="text" placeholder="Bijv. 1IW A" required />
+      </label>
+      <div class="modal-actions">
+        <button class="secondary-button" id="btn-report-back" type="button">Annuleer</button>
+        <button class="primary-button" type="submit">Genereer PDF</button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="app-footer">
+    <p>Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert. Alle rechten voorbehouden.</p>
+  </footer>
+</body>
+</html>

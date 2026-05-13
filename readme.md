@@ -1,93 +1,109 @@
-# Interactieve Luchtkwaliteitsmeter
+# Project Fijnstof
 
-**Auteur:** Robbe Wulgaert · [aiindeklas.be](http://aiindeklas.be) / [robbewulgaert.be](http://robbewulgaert.be)
-**© 2025 Robbe Wulgaert**
+Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be  
+© 2026 Robbe Wulgaert. Alle rechten voorbehouden.
 
-Demo: [klik hier!](https://robbew.github.io/projectfijnstof/)
+## Korte uitleg
 
----
+Project Fijnstof is een meetopdracht met Arduino en een HM330X-sensor. Leerlingen meten PM1, PM2.5 en PM10, bekijken de Europese AQI en vergelijken meetreeksen op basis van echte data.
 
-## 🎯 Doel
+De website is de lesomgeving: voorspellen, opstelling controleren, verbinden, meten, vergelijken en rapporteren. Er is ook een demomodus, zodat je het lesverloop kunt tonen zonder sensor.
 
-Deze webapplicatie stelt 15–16-jarige leerlingen in staat om:
+## Wat leerlingen doen
 
-* Fijnstof (PM1, PM2.5 en PM10) in realtime te meten met een HM330X-sensor op een Arduino.
-* De Europese Air Quality Index (AQI) te berekenen.
-* Metingen grafisch te visualiseren via een live chart.
-* Een PDF-rapport te genereren met samenvatting en ruwe data.
-* Met de ruwe data aan de slag te gaan in de les met Excel, Python ... en deze mee te nemen naar een postersessie. 
+Leerlingen:
 
-## 📋 Vereisten
+- formuleren een onderzoeksvraag en hypothese;
+- kiezen een meetplek en mogelijke bron van fijnstof;
+- controleren Arduino, sensor en firmware;
+- verbinden de Arduino met de browser of starten de demomodus;
+- verzamelen één of meerdere meetreeksen;
+- vergelijken gemiddelde en maximale waarden;
+- exporteren CSV-data voor verdere verwerking;
+- maken een PDF-rapport met grafiek, samenvatting, besluit en reflectie.
 
-1. **Hardware**
+## Wat leerlingen oefenen
 
-   * Arduino-compatibel board met USB-poort.
-   * HM330X-fijnstofsensor module.
+De opdracht maakt deze leerinhouden concreet:
 
-2. **Software & Browser**
+- fijnstof: PM1, PM2.5 en PM10;
+- concentratie in `µg/m³`;
+- Europese AQI als samenvattende score;
+- seriële communicatie tussen Arduino en browser;
+- meetduur en tijdstempels;
+- grafieken lezen;
+- ruwe data gebruiken voor een onderbouwd besluit.
 
-   * Google Chrome (of Chromium) met [WebSerial API]
-   * Internetverbinding
+## Lesverloop
 
-3. **Bibliotheken**
+1. Open `index.html` als startpagina.
+2. Ga naar `platform.html`.
+3. Upload `fijnstofsensor.ino` naar de Arduino.
+4. Controleer de sensoropstelling.
+5. Vul onderzoeksvraag, hypothese, meetplek en verwachte bron in.
+6. Verbind de Arduino of start de demomodus.
+7. Start een meetreeks.
+8. Stop de meetreeks.
+9. Maak eventueel een nieuwe meetreeks op een andere plek of in een andere situatie.
+10. Vergelijk de meetreeksen.
+11. Vul besluit en reflectie in.
+12. Genereer het PDF-rapport of exporteer CSV.
 
-   * **Arduino**: Tomoto\_HM330X sensorbibliotheek (via Library Manager of ZIP-installatie)
-   * **Frontend (via CDN)**:
+## Benodigdheden
 
-     * [Tailwind CSS](https://tailwindcss.com)
-     * [Smoothie Charts](https://smoothiecharts.org)
-     * [html2pdf.js](https://github.com/eKoopmans/html2pdf.js)
+- Arduino-compatibel board;
+- HM330X-fijnstofsensor;
+- USB-kabel die data doorgeeft;
+- Arduino IDE met de `Tomoto_HM330X`-bibliotheek;
+- Chrome of Edge voor WebSerial.
 
-## 🚀 Installatie & Gebruik
+## Seriële data
 
-### 1. Arduino-firmware
+De nieuwe firmware stuurt data op 9600 baud:
 
-1. Open `LuchtkwaliteitMeter.ino` in de Arduino IDE.
-2. Installeer de `Tomoto_HM330X`-bibliotheek via **Sketch → Include Library → Manage Libraries** of toevoeging van ZIP.
-3. Sluit de HM330X-sensor aan volgens de makersdocumentatie.
-4. Upload de sketch naar de Arduino.
-5. Open de Seriële Monitor op 9600 baud om te controleren of de sensor meet en CSV-gegevens verstuurt.
-
-### 2. Webapplicatie
-
-1. Clone deze repository:
-
-   ```bash
-   git clone https://github.com/gebruikersnaam/luchtkwaliteitsmeter.git
-   cd luchtkwaliteitsmeter
-   ```
-2. Open `index.html` in Google Chrome (lokale webserver of file:// werkt).
-3. Klik op **Verbind met Arduino** en sta de website toegang tot de seriële poort toe.
-4. Klik op **Begin meting** om live data te zien:
-
-   * Grafiek updatet elke seconde, nieuwe datapunt om de 5 sec.
-   * Kaartjes en debugbalk tonen actuele waarden.
-5. Klik op **Stop meting** om de stream te pauzeren.
-6. Klik op **Genereer rapport**, vul formulier in en download een PDF-rapport met samenvatting en ruwe data.
-
-## 📂 Projectstructuur
-
-```
-├── index.html       # Hoofd-HTML-pagina
-├── style.css        # Aangepaste CSS-variabelen en -regels
-├── script.js        # Frontend-logica (WebSerial, chart, PDF)
-├── LuchtkwaliteitMeter.ino  # Arduino-sketch
-└── README.md        # Deze documentatie
+```text
+tijd_ms,pm1_ug_m3,pm25_ug_m3,pm10_ug_m3,aqi
 ```
 
-## 🔧 Technische details
+Meer detail staat in:
 
-* **WebSerial**: Communicatie met Arduino via `navigator.serial`.
-* **SmoothieChart**: Live streaming grafiek.
-* **html2pdf.js**: HTML → canvas → PDF-export van rapporttemplate.
-* **Modale interface**: Tailwind utility classes voor responsive modals en knoppen.
-
-## Licentie & Copyright
-
-```
-© 2025 Robbe Wulgaert, aiindeklas.be / robbewulgaert.be
-Alle rechten voorbehouden.
+```text
+docs/protocol.md
 ```
 
-Niet-herdistribueren zonder schriftelijke toestemming van de auteur.
-Bij gebruik in de eigen klas: naamsvermelding auteur en Sint-Lievenscollege. 
+Oude firmware met alleen `PM1,PM2.5,PM10,AQI` blijft leesbaar, maar dan schat de webapp de meetduur. Voor klasgebruik is de nieuwe firmware beter.
+
+De Arduino-code stuurt ook statusregels die beginnen met `#`. Die helpen bij foutzoeken, bijvoorbeeld wanneer de HM330X niet gevonden wordt of wanneer een meting niet leesbaar is. De webapp toont die regels als diagnose en gebruikt ze niet als meetdata.
+
+## Bestandsstructuur
+
+```text
+Project Fijnstof/
+|-- index.html                  landingspagina
+|-- platform.html               meetplatform
+|-- style.css                   vormgeving
+|-- script.js                   WebSerial, demo, grafieken en rapportage
+|-- landing.js                  mobiel menu op de landingspagina
+|-- fijnstofsensor.ino          Arduino-code
+|-- readme.md
+|-- docs/
+|   |-- protocol.md
+|-- vendor/
+|   |-- chart.umd.min.js
+|   |-- jspdf.umd.min.js
+|   |-- jspdf.plugin.autotable.min.js
+```
+
+## Privacy en opslag
+
+De website gebruikt geen server en geen leerlingenaccounts. Meetgegevens blijven in de browser. Alleen wanneer een leerling zelf een CSV of PDF downloadt, wordt er een bestand op het toestel bewaard.
+
+## Voor publicatie op GitHub Pages
+
+Publiceer de repo-root via GitHub Pages. Controleer na publicatie:
+
+- `index.html` opent als startpagina;
+- `platform.html` laadt zonder ontbrekende bestanden;
+- de bestanden in `vendor/` staan mee online;
+- WebSerial werkt in Chrome of Edge;
+- de demomodus start ook zonder Arduino.

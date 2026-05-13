@@ -1,277 +1,170 @@
-<!--Auteur: Robbe Wulgaert / aiindeklas.be-->
-<!-- Copyright 2025 - Gebruik vrij voor educatie -->
-
-<!DOCTYPE html>
-<html lang="nl">
+<!doctype html>
+<!--
+  Project Fijnstof - landingspagina
+  Copyright (c) 2026 Robbe Wulgaert
+-->
+<html lang="nl-BE">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactieve Luchtkwaliteitsmeter</title>
-
-  <!-- Roboto Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <style>
-    :root {
-      --color-primary: #5200FF;
-      --color-secondary: #00FF99;
-      --color-bg: #F9F8FC;
-      --color-text: #110C1D;
-    }
-
-/* Thema-variabelen en donker-modus (uitbreiding) ===== */
-:root{
-  /* Merk (reeds aanwezig, hier nogmaals voor volledigheid) */
-  --color-primary:   #5200FF;
-  --color-secondary: #00FF99;
-
-  /* Thema (licht) */
-  --color-bg:        #F9F8FC;
-  --color-text:      #110C1D;
-  --color-surface:   #FFFFFF;   /* panelen/kaarten/modals/canvas */
-  --color-surface-2: #EBE6F4;   /* lichte knoppen/achtergrond */
-  --color-border:    #d6cdea;   /* kaart-randen */
-
-  /* Grafiek (labels/raster) */
-  --chart-grid:      #cfcbdc;
-  --chart-label:     #000000;
-}
-
-/* Donkere modus: pas variabelen aan op body.dark zodat alles erft */
-body.dark{
-  --color-bg:        #161820;
-  --color-text:      #FFFFFF;
-  --color-surface:   #23272e;
-  --color-surface-2: #2b303b;
-  --color-border:    #3a3f4a;
-
-  --chart-grid:      #3a3f4a;
-  --chart-label:     #e7e7e7;
-}
-
-/* Map basis op variabelen (body heeft Tailwind vars al, dit vult aan) */
-body{ background: var(--color-bg); color: var(--color-text); }
-
-/* Kaarten en modal volgen surface/border kleuren (via helper classes) */
-.card{
-  background: var(--color-surface) !important;
-  border-color: var(--color-border) !important;
-  color: var(--color-text);
-}
-.modal-card{
-  background: var(--color-surface) !important;
-  color: var(--color-text);
-}
-
-/* Canvas krijgt een subtiele rand & achtergrond zodat dark mode leesbaar is */
-.chart-canvas{
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-}
-
-/* Footer-tekst in thema-kleur */
-.footer-text{ color: var(--color-text); opacity: .9; }
-
-/* Debug bar blijft leesbaar; linkerkant al paars via bg-[var(...)] in HTML */
-#debug-bar{ border-top: 1px solid #00000014; }
-
-/* Thema-knop in header (we gebruiken de knop die je net toevoegde) */
-#btn-theme{
-  /* basisstijl via Tailwind classes in HTML; hier enkel dark-randje */
-}
-body.dark #btn-theme{
-  border: 1px solid #ffffff33;
-}
-  
-  </style>
-
-  <!-- Eigen CSS -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Fijnstof</title>
+  <meta
+    name="description"
+    content="Project Fijnstof is een meetopdracht met Arduino, HM330X-sensor, WebSerial, live grafieken en PDF-rapportage."
+  />
+  <meta name="author" content="Robbe Wulgaert, AI in de Klas, robbewulgaert.be" />
+  <meta name="copyright" content="Copyright (c) 2026 Robbe Wulgaert" />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%235200FF"/><text x="32" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="white">IW</text></svg>' />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- SmoothieChart CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/smoothie@1.36/smoothie.min.js" defer></script>
-  <!-- jsPDF & AutoTable CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js" defer></script>
-  <!-- Eigen script -->
-  <script src="script.js" defer></script>
 </head>
-<body class="flex min-h-screen flex-col bg-[var(--color-bg)] text-[var(--color-text)] font-['Roboto']">
+<body class="landing-page">
+  <a class="skip-link" href="#main">Spring naar inhoud</a>
 
-  <!-- Header -->
-<header class="bg-[var(--color-primary)] text-white px-6 md:px-10 py-4 flex items-center justify-between">
-  <h1 class="text-2xl md:text-3xl font-black">Interactieve Luchtkwaliteitsmeter</h1>
-
-  <!-- Rechts: thema-toggle + AI-link -->
-  <div class="flex items-center gap-3">
-    <!-- NL: Thema-toggle (donker/licht) -->
-    <button id="btn-theme"
-            class="rounded-full w-10 h-10 flex items-center justify-center bg-white/95 text-[var(--color-primary)] font-bold shadow focus:outline-none focus:ring-2 focus:ring-white/80 active:scale-95 transition"
-            aria-pressed="false" title="Wissel thema">🌙</button>
-
-    <a href="https://chatgpt.com/g/g-67caf6f8eb688191abd7f722ffcb2979-professor-dusty"
-       target="_blank"
-       class="bg-white text-[var(--color-primary)] font-bold px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white/80 active:scale-95 transition">
-       Stel vragen aan Professor Dusty (AI)
-    </a>
-  </div>
-</header>
-
-  <!-- Controls -->
-  <div class="flex flex-wrap gap-3 px-6 md:px-10 py-4">
-    <button id="btn-connect" class="flex-1 bg-[var(--color-primary)] text-white font-bold py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] active:scale-95 transition">Verbind met Arduino</button>
-    <button id="btn-start" class="flex-1 bg-[#EBE6F4] text-[var(--color-text)] font-bold py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] active:scale-95 transition">Begin meting</button>
-    <button id="btn-stop" disabled class="flex-1 bg-[#EBE6F4] text-[var(--color-text)] font-bold py-2 rounded-full opacity-50 cursor-not-allowed">Stop meting</button>
-    <button id="btn-report" class="flex-1 bg-[var(--color-primary)] text-white font-bold py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] active:scale-95 transition">Genereer rapport</button>
-  </div>
-
-  <!-- Debug bar -->
-<div id="debug-bar" class="hidden px-6 md:px-10 py-2 text-sm bg-[var(--color-primary)] text-white/95">
-  PM1: -- µg/m³ | PM2.5: -- µg/m³ | PM10: -- µg/m³ | AQI: --
-</div>
-
-  <!-- Cards + Chart -->
-  <main class="px-6 md:px-10 flex-1">
-    <<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  <div class="p-4 rounded-xl border bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)]">
-    <p class="font-medium">PM1 Levels</p>
-    <p data-pm1 class="text-3xl font-bold">-- µg/m³</p>
-  </div>
-  <div class="p-4 rounded-xl border bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)]">
-    <p class="font-medium">PM2.5 Levels</p>
-    <p data-pm25 class="text-3xl font-bold">-- µg/m³</p>
-  </div>
-  <div class="p-4 rounded-xl border bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)]">
-    <p class="font-medium">PM10 Levels</p>
-    <p data-pm10 class="text-3xl font-bold">-- µg/m³</p>
-  </div>
-  <div class="p-4 rounded-xl border bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)]">
-    <p class="font-medium">Europese AQI</p>
-    <p data-aqi class="text-3xl font-bold">--</p>
-  </div>
-</div>
-    <h2 class="text-xl font-bold mb-2">Meting luchtkwaliteit (live)</h2>
-    <!-- Legend -->
-    <div class="flex flex-wrap gap-4 mb-4">
-      <div class="flex items-center gap-1">
-        <span class="w-4 h-4 bg-blue-500 rounded-sm"></span>
-        <span class="text-sm">PM1</span>
+  <header class="site-header">
+    <nav class="nav" aria-label="Hoofdnavigatie">
+      <a class="brand-link" href="#top" aria-label="Project Fijnstof">
+        <span class="brand-mark">IW</span>
+        <span class="brand-copy">
+          <span class="brand-title">Project Fijnstof</span>
+          <span class="brand-subtitle">Arduino · luchtkwaliteit · onderzoek</span>
+        </span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#werking">Werking</a>
+        <a href="#leren">Wat leer je?</a>
+        <a href="#klas">Voor leerkrachten</a>
+        <a href="#opstelling">Opstelling</a>
       </div>
-      <div class="flex items-center gap-1">
-        <span class="w-4 h-4 bg-red-500 rounded-sm"></span>
-        <span class="text-sm">PM2.5</span>
+      <div class="nav-actions">
+        <a class="btn btn-primary btn-small" href="platform.html">Start platform</a>
+        <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks">
+          Menu
+        </button>
       </div>
-      <div class="flex items-center gap-1">
-        <span class="w-4 h-4 bg-green-500 rounded-sm"></span>
-        <span class="text-sm">PM10</span>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="landing-hero" id="top" aria-label="Project Fijnstof">
+      <div class="hero-content">
+        <p class="section-kicker">Onderzoekopdracht IW</p>
+        <h1>Project Fijnstof</h1>
+        <p class="hero-lead">
+          Leerlingen meten fijnstof in hun omgeving, vergelijken meetmomenten en schrijven een besluit op basis van echte data.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="platform.html">Start meetplatform</a>
+          <a class="btn btn-secondary" href="#werking">Bekijk de opdracht</a>
+        </div>
       </div>
-      <div class="flex items-center gap-1">
-        <span class="w-4 h-4 bg-purple-500 rounded-sm"></span>
-        <span class="text-sm">AQI</span>
+    </section>
+
+    <section class="section landing-intro" id="werking">
+      <div class="section-kicker">Werking</div>
+      <h2 class="section-title">Van sensorwaarde naar conclusie.</h2>
+      <div class="steps">
+        <article class="step-card">
+          <span>1</span>
+          <h3>Voorspel</h3>
+          <p>Leerlingen kiezen een plek of situatie en noteren wat ze verwachten te meten.</p>
+        </article>
+        <article class="step-card">
+          <span>2</span>
+          <h3>Meet</h3>
+          <p>De Arduino stuurt PM1, PM2.5, PM10 en AQI naar de browser. De grafiek loopt live mee.</p>
+        </article>
+        <article class="step-card">
+          <span>3</span>
+          <h3>Vergelijk</h3>
+          <p>Meerdere metingen komen samen in een overzicht met gemiddelden, maxima en grafieken.</p>
+        </article>
+        <article class="step-card">
+          <span>4</span>
+          <h3>Besluit</h3>
+          <p>Het rapport bundelt onderzoeksvraag, meetgegevens, grafiek, besluit en reflectie.</p>
+        </article>
       </div>
-    </div>
-    <canvas id="aqi-chart" width="800" height="300" class="chart-canvas w-full h-72 mb-10"></canvas>
+    </section>
+
+    <section class="section media-section" id="opstelling" aria-label="Projectopstelling">
+      <div class="split">
+        <article class="audience-card">
+          <p class="section-kicker">De opstelling</p>
+          <h2 class="section-title">Een sensor, een Arduino en een duidelijke meting.</h2>
+          <p class="section-lead">
+            Leerlingen bouwen geen abstract dashboard. Ze sluiten de sensor aan, meten in een echte omgeving
+            en vergelijken wat ze zien met wat de grafiek toont.
+          </p>
+          <ul class="bullet-list">
+            <li>De HM330X-sensor meet PM1, PM2.5 en PM10.</li>
+            <li>De Arduino stuurt de meetwaarden naar de browser.</li>
+            <li>De webpagina helpt om meerdere meetreeksen eerlijk te vergelijken.</li>
+          </ul>
+        </article>
+
+        <figure class="photo-frame">
+          <img src="media/fijnstof_opstelling.jpg" alt="Arduino fijnstofopstelling met sensor en bedrading" />
+          <figcaption>Projectfoto van de fijnstofopstelling in de klas.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="leren">
+      <div class="section-kicker">Wat leer je?</div>
+      <h2 class="section-title">Luchtkwaliteit wordt meetbaar.</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Fijnstof</h3>
+          <p>PM1, PM2.5 en PM10 worden zichtbaar als concentratie in µg/m³.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Dataverwerking</h3>
+          <p>Leerlingen vergelijken gemiddelde en maximale waarden in plaats van losse meetpunten.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Onderzoek</h3>
+          <p>Een meetplek, meetomstandigheden en mogelijke bron worden expliciet genoteerd.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Rapportage</h3>
+          <p>De PDF maakt van de meting een korte, bespreekbare onderzoeksoutput.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section split-section" id="klas">
+      <div>
+        <div class="section-kicker">Voor leerkrachten</div>
+        <h2 class="section-title">Snel inzetbaar in de klas.</h2>
+        <p>
+          De webversie werkt met echte hardware of in demomodus. Daardoor kun je de opdracht voorbereiden,
+          klassikaal tonen en laten oefenen zonder dat elke groep meteen een werkende sensor nodig heeft.
+        </p>
+      </div>
+      <ul class="check-list">
+        <li>Geen installatie of leerlingenaccount.</li>
+        <li>Lokale bibliotheken voor grafieken en PDF-export.</li>
+        <li>Geschikt voor GitHub Pages.</li>
+        <li>Rapport met naam, klas, grafiek, samenvatting en reflectie.</li>
+      </ul>
+    </section>
+
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-[var(--color-secondary)] text-center py-4">
-    <p class="footer-text text-sm">© 2025 Robbe Wulgaert · AI in de Klas</p>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">Project Fijnstof</div>
+        <p>Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.robbewulgaert.be">robbewulgaert.be</a>
+        <a href="https://www.aiindeklas.be">AI in de Klas</a>
+        <a href="platform.html">Platform</a>
+      </div>
+    </div>
   </footer>
 
-  <!-- Rapport Modal -->
-  <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <form id="report-form" class="modal-card bg-white rounded-lg p-6 w-11/12 max-w-md">
-      <h3 class="text-lg font-bold mb-4">Rapportgegevens</h3>
-      <label class="block mb-2">
-        <span>Aantal studenten</span>
-        <input type="number" id="input-count" min="1" value="1" class="mt-1 block w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
-      </label>
-      <label class="block mb-2">
-        <span>Studentenamen</span>
-        <input type="text" id="input-names" placeholder="Robbe Wulgaert, Cédric Bracke" class="mt-1 block w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
-      </label>
-      <label class="block mb-4">
-        <span>Onderzoeksvraag</span>
-        <textarea id="input-question" rows="2" class="mt-1 block w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"></textarea>
-      </label>
-      <div class="flex justify-end gap-2">
-        <button type="button" id="btn-cancel" class="px-4 py-2 bg-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">Annuleer</button>
-        <button type="submit" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]">Genereer PDF</button>
-      </div>
-    </form>
-  </div>
-
-  <script>
-// ===== NL: Thema-besturing (donker/licht) voor Luchtkwaliteitsmeter =====
-(function(){
-  const THEME_KEY = 'aqi-theme';
-  const btn = document.getElementById('btn-theme');
-
-  // (Optioneel) SmoothieChart referentie opslaan zodat we labels/raster kunnen stylen
-  // Gebruik in je eigen script.js na het maken van de chart:
-  //   window.__setSmoothieRef && window.__setSmoothieRef(chart);
-  let smoothieRef = null;
-  window.__setSmoothieRef = function(chartInstance){
-    smoothieRef = chartInstance;
-    // Bij registratie meteen huidige thema toepassen
-    applyChartTheme(document.body.classList.contains('dark'));
-  };
-
-  // Pas grafiekkleuren aan (labels/raster) zodat de chart leesbaar blijft
-  function applyChartTheme(isDark){
-    if(!smoothieRef) return;
-    try{
-      const cs = getComputedStyle(document.body);
-      const grid = cs.getPropertyValue('--chart-grid').trim();
-      const labl = cs.getPropertyValue('--chart-label').trim();
-      smoothieRef.options = smoothieRef.options || {};
-      smoothieRef.options.grid   = smoothieRef.options.grid   || {};
-      smoothieRef.options.labels = smoothieRef.options.labels || {};
-      smoothieRef.options.grid.strokeStyle  = grid;
-      smoothieRef.options.labels.fillStyle  = labl;
-      // NB: Datakleuren (series) laat je merkconsistent in je eigen script.js
-      console.log('🎨 (Thema) Smoothie-stijl bijgewerkt:', isDark ? 'donker' : 'licht');
-    }catch(e){
-      console.log('ℹ️ (Thema) Grafiek kon niet worden gestyled:', e);
-    }
-  }
-
-  function setTheme(theme){
-    const isDark = theme === 'dark';
-    document.body.classList.toggle('dark', isDark);
-    localStorage.setItem(THEME_KEY, theme);
-    if (btn){
-      btn.setAttribute('aria-pressed', String(isDark));
-      btn.textContent = isDark ? '☀️' : '🌙';
-    }
-    applyChartTheme(isDark);
-    console.log('🌓 (Thema) Ingesteld op:', theme);
-  }
-
-  function getInitialTheme(){
-    const saved = localStorage.getItem(THEME_KEY);
-    // Standaard: licht, tenzij gebruiker reeds koos
-    return (saved === 'dark' || saved === 'light') ? saved : 'light';
-  }
-
-  // Init
-  setTheme(getInitialTheme());
-
-  // Toggleknop
-  btn && btn.addEventListener('click', ()=>{
-    const next = document.body.classList.contains('dark') ? 'light' : 'dark';
-    setTheme(next);
-  });
-})();
-</script>
-
+  <script src="landing.js" defer></script>
 </body>
 </html>
-
-
-
