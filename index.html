@@ -34,9 +34,10 @@
         <a href="#leren">Wat leer je?</a>
         <a href="#klas">Voor leerkrachten</a>
         <a href="#opstelling">Opstelling</a>
+        <a href="#leerlijn">Leerlijn</a>
       </div>
       <div class="nav-actions">
-        <a class="btn btn-primary btn-small" href="platform.html">Start platform</a>
+        <a class="btn btn-primary" href="platform.html">Start platform</a>
         <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks">
           Menu
         </button>
@@ -47,13 +48,12 @@
   <main id="main">
     <section class="landing-hero" id="top" aria-label="Project Fijnstof">
       <div class="hero-content">
-        <p class="section-kicker">Onderzoekopdracht IW</p>
         <h1>Project Fijnstof</h1>
         <p class="hero-lead">
-          Leerlingen meten fijnstof in hun omgeving, vergelijken meetmomenten en schrijven een besluit op basis van echte data.
+          Leerlingen formuleren een onderzoeksvraag, meten fijnstof in hun omgeving, vergelijken meetmomenten en schrijven een besluit op basis van eigen data.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="platform.html">Start meetplatform</a>
+          <a class="btn btn-primary" href="platform.html">Start platform</a>
           <a class="btn btn-secondary" href="#werking">Bekijk de opdracht</a>
         </div>
       </div>
@@ -61,7 +61,7 @@
 
     <section class="section landing-intro" id="werking">
       <div class="section-kicker">Werking</div>
-      <h2 class="section-title">Van sensorwaarde naar conclusie.</h2>
+      <h2 class="section-title">Van sensor naar postersessie.</h2>
       <div class="steps">
         <article class="step-card">
           <span>1</span>
@@ -83,6 +83,11 @@
           <h3>Besluit</h3>
           <p>Het rapport bundelt onderzoeksvraag, meetgegevens, grafiek, besluit en reflectie.</p>
         </article>
+        <article class="step-card">
+          <span>5</span>
+          <h3>Poster</h3>
+          <p>Presenteer jouw bevindingen aan de klas met een publieke postersessie.</p>
+        </article>
       </div>
     </section>
 
@@ -92,8 +97,7 @@
           <p class="section-kicker">De opstelling</p>
           <h2 class="section-title">Een sensor, een Arduino en een duidelijke meting.</h2>
           <p class="section-lead">
-            Leerlingen bouwen geen abstract dashboard. Ze sluiten de sensor aan, meten in een echte omgeving
-            en vergelijken wat ze zien met wat de grafiek toont.
+            Leerlingen sluiten de sensor aan, meten in een echte omgeving en verzamelen zo hun eigen meetresultaten.
           </p>
           <ul class="bullet-list">
             <li>De HM330X-sensor meet PM1, PM2.5 en PM10.</li>
@@ -129,11 +133,85 @@
           <h3>Rapportage</h3>
           <p>De PDF maakt van de meting een korte, bespreekbare onderzoeksoutput.</p>
         </article>
+        <article class="feature-card">
+          <h3>Poster</h3>
+          <p>Die output verwerken leerlingen tot een behapbare poster.</p>
+        </article>
       </div>
     </section>
 
-    <section class="section split-section" id="klas">
-      <div>
+    <section class="section curriculum-section" id="leerlijn">
+      <div class="section-kicker">Plaats in de leerlijn</div>
+      <h2 class="section-title">Van platformen naar projecten.</h2>
+      <p class="section-lead">
+        De platformen bouwen het computationeel denken op. De projecten gebruiken dat denken in een
+        vakoverschrijdende opdracht waarin leerlingen bouwen, meten, testen en besluiten.
+      </p>
+
+      <div class="family-tree" aria-label="Leerlijn van platformen en projecten">
+        <div class="tree-root">
+          <a class="tree-node root" href="https://www.aiindeklas.be" target="_blank" rel="noopener">
+            <strong>Leren computationeel denken</strong>
+            <span>van blokken naar code, van code naar onderzoek</span>
+          </a>
+        </div>
+
+        <div class="tree-branches">
+          <div class="tree-branch">
+            <div class="branch-title">Platformen</div>
+            <div class="tree-stack">
+              <a class="tree-node" href="https://robbew.github.io/Blockly/" target="_blank" rel="noopener">
+                <strong>Blockly</strong>
+                <span>visueel denken in stappen.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/jsindeklas/" target="_blank" rel="noopener">
+                <strong>JavaScript</strong>
+                <span>logica in echte code.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/htmlindeklas/" target="_blank" rel="noopener">
+                <strong>HTML</strong>
+                <span>webpagina's structureren.</span>
+              </a>
+              <div class="delphi-dodona-pair" aria-label="Dodona en Delphi">
+                <a class="tree-node dodona" href="https://dodona.be/nl/courses/2641/" target="_blank" rel="noopener">
+                  <strong>Dodona</strong>
+                  <span>Python in de Klas met opvolging.</span>
+                </a>
+                <a class="tree-node" href="https://robbew.github.io/delphi/" target="_blank" rel="noopener">
+                  <strong>Delphi</strong>
+                  <span>licht oefenen in de browser.</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="tree-branch">
+            <div class="branch-title">STEaM-projecten</div>
+            <div class="tree-stack">
+              <a class="tree-node" href="https://robbew.github.io/robothand/" target="_blank" rel="noopener">
+                <strong>Robothand</strong>
+                <span>Arduino, sensoren, servo's en beweging.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/projectwind/" target="_blank" rel="noopener">
+                <strong>Wind</strong>
+                <span>Micro:bit, energie, spanning en stroom.</span>
+              </a>
+              <a class="tree-node current" href="https://robbew.github.io/fijnstof/" target="_blank" rel="noopener" aria-current="page">
+                <strong>Fijnstof</strong>
+                <span>Arduino, luchtkwaliteit, data en postersessie.</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="logic-note">
+          De platformen trainen computationeel denken. De projecten laten leerlingen dat denken inzetten in een vakoverschrijdende opdracht.
+        </div>
+      </div>
+    </section>
+
+    <section class="section split-section teacher-section" id="klas">
+      <div class="teacher-copy">
         <div class="section-kicker">Voor leerkrachten</div>
         <h2 class="section-title">Snel inzetbaar in de klas.</h2>
         <p>
@@ -141,7 +219,7 @@
           klassikaal tonen en laten oefenen zonder dat elke groep meteen een werkende sensor nodig heeft.
         </p>
       </div>
-      <ul class="check-list">
+      <ul class="check-list teacher-check-list">
         <li>Geen installatie of leerlingenaccount.</li>
         <li>Lokale bibliotheken voor grafieken en PDF-export.</li>
         <li>Geschikt voor GitHub Pages.</li>
