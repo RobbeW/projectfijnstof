@@ -16,6 +16,43 @@
   <meta name="copyright" content="Copyright (c) 2026 Robbe Wulgaert" />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%235200FF"/><text x="32" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="white">IW</text></svg>' />
   <link rel="stylesheet" href="style.css" />
+  <style id="language-toggle-styles">
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(82, 0, 255, 0.22);
+  border-radius: 999px;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 10px 24px rgba(82, 0, 255, 0.08);
+}
+.language-toggle button {
+  min-width: 44px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--muted, var(--delphi-muted, #625b70));
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.language-toggle button.is-active {
+  background: var(--brand, var(--brand-purple, var(--delphi-blue, #5200FF)));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(82, 0, 255, 0.20);
+}
+.language-toggle button:focus-visible {
+  outline: 3px solid rgba(61, 255, 208, 0.75);
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .language-toggle { order: 2; }
+}
+</style>
 </head>
 <body class="landing-page">
   <a class="skip-link" href="#main">Spring naar inhoud</a>
@@ -37,6 +74,10 @@
         <a href="#leerlijn">Leerlijn</a>
       </div>
       <div class="nav-actions">
+        <div class="language-toggle" role="group" aria-label="Taalkeuze">
+          <button type="button" class="is-active" data-language-choice="nl" aria-pressed="true">NL</button>
+          <button type="button" data-language-choice="en" aria-pressed="false">ENG</button>
+        </div>
         <a class="btn btn-primary" href="platform.html">Start platform</a>
         <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks">
           Menu
@@ -248,5 +289,191 @@
   </footer>
 
   <script src="landing.js" defer></script>
+<script id="language-toggle-script">
+(() => {
+  const LANGUAGE_KEY = "aiindeklas:index-language";
+  const TRANSLATIONS = {
+  "Spring naar inhoud": "Skip to content",
+  "Spring naar hoofdinhoud": "Skip to main content",
+  "Hoofdnavigatie": "Main navigation",
+  "Paginaonderdelen": "Page sections",
+  "Taalkeuze": "Language selection",
+  "Werking": "How it works",
+  "Wat leer je?": "What will you learn?",
+  "Onderdelen": "Components",
+  "Familie": "Family",
+  "Voor leerkrachten": "For teachers",
+  "Leerlijn": "Learning path",
+  "Benodigdheden": "Materials",
+  "Privacy": "Privacy",
+  "Opstelling": "Setup",
+  "Gebruik": "Use",
+  "README": "README",
+  "Platform": "Platform",
+  "Pythia": "Pythia",
+  "Start leerplatform": "Start learning platform",
+  "Start platform": "Start platform",
+  "Menu": "Menu",
+  "Bekijk de opdracht": "View the assignment",
+  "Lees README": "Read README",
+  "Leerplatform": "Learning platform",
+  "Onderzoeksplatform": "Research platform",
+  "Oefeningmaker": "Exercise builder",
+  "Open oefeningmaker": "Open exercise builder",
+  "Plaats in de leerlijn": "Place in the learning path",
+  "Van platformen naar projecten.": "From platforms to projects.",
+  "De platformen bouwen het computationeel denken op. De projecten gebruiken dat denken in een vakoverschrijdende opdracht waarin leerlingen bouwen, meten, testen en besluiten.": "The platforms build computational thinking. The projects use that thinking in a cross-curricular assignment in which students build, measure, test and conclude.",
+  "Leren computationeel denken": "Learning computational thinking",
+  "van blokken naar code, van code naar onderzoek": "from blocks to code, from code to research",
+  "Platformen": "Platforms",
+  "STEaM-projecten": "STEaM projects",
+  "Blockly": "Blockly",
+  "JavaScript": "JavaScript",
+  "HTML": "HTML",
+  "Dodona": "Dodona",
+  "Delphi": "Delphi",
+  "Robothand": "Robotic hand",
+  "Wind": "Wind",
+  "Slimme vuilnisbak": "Smart bin",
+  "Slimme Vuilnisbak": "Smart Bin",
+  "Fijnstof": "Particulate matter",
+  "visueel denken in stappen.": "visual step-by-step thinking.",
+  "logica in echte code.": "logic in real code.",
+  "webpagina's structureren.": "structuring webpages.",
+  "Python in de Klas met opvolging.": "Python in the Classroom with tracking.",
+  "licht oefenen in de browser.": "lightweight practice in the browser.",
+  "Arduino, sensoren, servo's en beweging.": "Arduino, sensors, servos and movement.",
+  "Micro:bit, energie, spanning en stroom.": "Micro:bit, energy, voltage and current.",
+  "AI, beeldherkenning, data en microcontrollers.": "AI, image recognition, data and microcontrollers.",
+  "Arduino, luchtkwaliteit, data en postersessie.": "Arduino, air quality, data and poster session.",
+  "De platformen trainen computationeel denken. De projecten laten leerlingen dat denken inzetten in een vakoverschrijdende opdracht.": "The platforms train computational thinking. The projects let students apply that thinking in a cross-curricular assignment.",
+  "Geen accounts, geen serveropslag.": "No accounts, no server storage.",
+  "Privacyvriendelijk": "Privacy-friendly",
+  "Geen installatie of leerlingenaccount.": "No installation or student account.",
+  "Lokale bibliotheken voor grafieken en PDF-export.": "Local libraries for charts and PDF export.",
+  "Geschikt voor GitHub Pages.": "Suitable for GitHub Pages.",
+  "robbewulgaert.be": "robbewulgaert.be",
+  "AI in de Klas": "AI in de Klas",
+  "Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be": "Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be",
+  "© 2026 Robbe Wulgaert. Alle rechten voorbehouden.": "© 2026 Robbe Wulgaert. All rights reserved.",
+  "Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert.": "Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert.",
+  "Robbe Wulgaert, AI in de Klas, robbewulgaert.be": "Robbe Wulgaert, AI in de Klas, robbewulgaert.be",
+  "Licentie": "License",
+  "Third-party notices": "Third-party notices",
+  "Contact": "Contact",
+  "Project Fijnstof": "Project Particulate Matter",
+  "Arduino · luchtkwaliteit · onderzoek": "Arduino · air quality · research",
+  "Leerlingen formuleren een onderzoeksvraag, meten fijnstof in hun omgeving, vergelijken meetmomenten en schrijven een besluit op basis van eigen data.": "Students formulate a research question, measure particulate matter in their environment, compare measurement moments and write a conclusion based on their own data.",
+  "Van sensor naar postersessie.": "From sensor to poster session.",
+  "Voorspel": "Predict",
+  "Leerlingen kiezen een plek of situatie en noteren wat ze verwachten te meten.": "Students choose a place or situation and note what they expect to measure.",
+  "Meet": "Measure",
+  "De Arduino stuurt PM1, PM2.5, PM10 en AQI naar de browser. De grafiek loopt live mee.": "The Arduino sends PM1, PM2.5, PM10 and AQI to the browser. The graph updates live.",
+  "Vergelijk": "Compare",
+  "Meerdere metingen komen samen in een overzicht met gemiddelden, maxima en grafieken.": "Multiple measurements come together in an overview with averages, maxima and graphs.",
+  "Besluit": "Conclude",
+  "Het rapport bundelt onderzoeksvraag, meetgegevens, grafiek, besluit en reflectie.": "The report bundles research question, measurement data, graph, conclusion and reflection.",
+  "Poster": "Poster",
+  "Presenteer jouw bevindingen aan de klas met een publieke postersessie.": "Present your findings to the class in a public poster session.",
+  "De opstelling": "The setup",
+  "Een sensor, een Arduino en een duidelijke meting.": "One sensor, one Arduino and a clear measurement.",
+  "Leerlingen sluiten de sensor aan, meten in een echte omgeving en verzamelen zo hun eigen meetresultaten.": "Students connect the sensor, measure in a real environment and collect their own measurement results.",
+  "De HM330X-sensor meet PM1, PM2.5 en PM10.": "The HM330X sensor measures PM1, PM2.5 and PM10.",
+  "De Arduino stuurt de meetwaarden naar de browser.": "The Arduino sends the measurements to the browser.",
+  "De webpagina helpt om meerdere meetreeksen eerlijk te vergelijken.": "The webpage helps compare multiple measurement series fairly.",
+  "Projectfoto van de fijnstofopstelling in de klas.": "Project photo of the particulate matter setup in class.",
+  "Luchtkwaliteit wordt meetbaar.": "Air quality becomes measurable.",
+  "PM1, PM2.5 en PM10 worden zichtbaar als concentratie in µg/m³.": "PM1, PM2.5 and PM10 become visible as concentrations in µg/m³.",
+  "Dataverwerking": "Data processing",
+  "Leerlingen vergelijken gemiddelde en maximale waarden in plaats van losse meetpunten.": "Students compare average and maximum values instead of isolated measurement points.",
+  "Onderzoek": "Research",
+  "Een meetplek, meetomstandigheden en mogelijke bron worden expliciet genoteerd.": "A measurement location, measurement conditions and possible source are explicitly noted.",
+  "Rapportage": "Reporting",
+  "De PDF maakt van de meting een korte, bespreekbare onderzoeksoutput.": "The PDF turns the measurement into a short research output that can be discussed.",
+  "Die output verwerken leerlingen tot een behapbare poster.": "Students process that output into a manageable poster.",
+  "De webversie werkt met echte hardware of in demomodus. Daardoor kun je de opdracht voorbereiden, klassikaal tonen en laten oefenen zonder dat elke groep meteen een werkende sensor nodig heeft.": "The web version works with real hardware or in demo mode. This lets you prepare the assignment, show it to the class and let students practise without every group immediately needing a working sensor.",
+  "Rapport met naam, klas, grafiek, samenvatting en reflectie.": "Report with name, class, graph, summary and reflection."
+};
+  const META = {
+  "title": "Project Particulate Matter",
+  "description": "Project Particulate Matter is a measurement assignment with Arduino, HM330X sensor, WebSerial, live charts and PDF reporting."
+};
+  const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION"]);
+  const TEXT_NODES = [];
+  const ATTR_NODES = [];
+  let originalTitle = document.title;
+  let originalDescription = null;
+  const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+  function preserveOuterWhitespace(original, translated) {
+    const start = original.match(/^\s*/)?.[0] || "";
+    const end = original.match(/\s*$/)?.[0] || "";
+    return start + translated + end;
+  }
+  function collectTextNodes() {
+    if (TEXT_NODES.length) return;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent || SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        return normalize(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      TEXT_NODES.push({ node, original: node.nodeValue, key: normalize(node.nodeValue) });
+    }
+  }
+  function collectAttributes() {
+    if (ATTR_NODES.length) return;
+    document.querySelectorAll("[aria-label], [alt], [title], [placeholder]").forEach((element) => {
+      ["aria-label", "alt", "title", "placeholder"].forEach((attr) => {
+        if (element.hasAttribute(attr)) {
+          const original = element.getAttribute(attr);
+          ATTR_NODES.push({ element, attr, original, key: normalize(original) });
+        }
+      });
+    });
+  }
+  function setLanguage(language) {
+    const useEnglish = language === "en";
+    collectTextNodes();
+    collectAttributes();
+    TEXT_NODES.forEach((entry) => {
+      const translated = TRANSLATIONS[entry.key];
+      entry.node.nodeValue = useEnglish && translated ? preserveOuterWhitespace(entry.original, translated) : entry.original;
+    });
+    ATTR_NODES.forEach((entry) => {
+      const translated = TRANSLATIONS[entry.key];
+      entry.element.setAttribute(entry.attr, useEnglish && translated ? translated : entry.original);
+    });
+    document.documentElement.lang = useEnglish ? "en" : "nl-BE";
+    document.title = useEnglish && META.title ? META.title : originalTitle;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      if (originalDescription === null) originalDescription = description.getAttribute("content") || "";
+      description.setAttribute("content", useEnglish && META.description ? META.description : originalDescription);
+    }
+    document.querySelectorAll("[data-language-choice]").forEach((button) => {
+      const isActive = button.dataset.languageChoice === (useEnglish ? "en" : "nl");
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+    try { localStorage.setItem(LANGUAGE_KEY, useEnglish ? "en" : "nl"); } catch (error) {}
+  }
+  function initLanguageToggle() {
+    document.querySelectorAll("[data-language-choice]").forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.languageChoice));
+    });
+    let saved = "nl";
+    try {
+      const requested = new URLSearchParams(window.location.search).get("lang");
+      saved = requested || localStorage.getItem(LANGUAGE_KEY) || "nl";
+    } catch (error) {}
+    setLanguage(saved === "en" ? "en" : "nl");
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLanguageToggle);
+  else initLanguageToggle();
+})();
+</script>
 </body>
 </html>
