@@ -369,18 +369,10 @@ body > header .tab.active {
         <label><input type="checkbox" /> Arduino is verbonden met USB.</label>
         <label><input type="checkbox" /> HM330X-sensor is aangesloten op I2C.</label>
         <label><input type="checkbox" /> De sensor krijgt voeding en lucht kan vrij binnen.</label>
-<<<<<<< Updated upstream
-        <label class="steam-code-check-item">
-          <input type="checkbox" />
-          <span>De correcte Arduino-code staat op het bord.</span>
-          <button id="btn-code-help" class="steam-code-help-button" type="button" aria-label="Toon waar de projectcode staat" title="Toon waar de projectcode staat">?</button>
-        </label>
-=======
         <label><input type="checkbox" data-optional /> microSD-module is aangesloten op SPI en CS-pin 10.</label>
         <label><input type="checkbox" data-optional /> microSD-kaart is FAT32 geformatteerd en geplaatst.</label>
         <label><input type="checkbox" data-optional /> Batterijpack is opgeladen en getest.</label>
         <label><input type="checkbox" /> De correcte Arduino-code staat op het bord.</label>
->>>>>>> Stashed changes
       </div>
     </section>
 
@@ -397,10 +389,9 @@ body > header .tab.active {
           <div class="toolbar">
             <button id="btn-connect" class="primary-button" type="button">Verbind Arduino</button>
             <button id="btn-demo" class="secondary-button" type="button">Start demomodus</button>
-            <input id="input-log-file" class="visually-hidden" type="file" accept=".csv,text/csv" />
+            <input id="input-log-file" type="file" accept=".csv,text/csv" hidden />
             <button id="btn-import-log" class="ghost-button" type="button">Upload log-bestand</button>
           </div>
-          <small id="file-import-status" class="import-status">Geen logbestand gekozen.</small>
         </div>
         <div class="diagnostics-panel" aria-live="polite">
           <h3>Diagnose</h3>
@@ -593,16 +584,6 @@ body > header .tab.active {
     </form>
   </div>
 
-  <div id="code-help-modal" class="report-overlay hidden code-help-overlay" role="dialog" aria-modal="true" aria-labelledby="code-help-title">
-    <article class="report-modal steam-code-modal">
-      <button id="btn-close-code-help" class="close-button" type="button" aria-label="Sluit codehulp">x</button>
-      <p class="eyebrow">Code uploaden</p>
-      <h2 id="code-help-title">Waar vind ik de Arduino-code?</h2>
-      <p>Deze opstelling werkt pas wanneer de Arduino de juiste projectcode heeft gekregen. Je vindt de code tussen de andere bronbestanden.</p>
-      <a class="steam-code-link" href="https://github.com/RobbeW/projectfijnstof" target="_blank" rel="noopener noreferrer">Open RobbeW/projectfijnstof op GitHub</a>
-    </article>
-  </div>
-
   <footer class="app-footer">
     <p>Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert. Alle rechten voorbehouden.</p>
   </footer>
@@ -629,74 +610,21 @@ body > header .tab.active {
   "Vergelijken": "Comparing",
   "Besluit": "Conclusion",
   "Besluiten": "Concluding",
-  "Kalibreer": "Calibrate",
-  "Kalibreren": "Calibrating",
-  "Observeer": "Observe",
-  "Observeren": "Observing",
-  "Speel": "Play",
-  "Model": "Model",
-  "Kies model": "Choose model",
-  "Test": "Test",
-  "Testen": "Testing",
-  "Sorteer": "Sort",
-  "Sorteren": "Sorting",
-  "Menu": "Menu",
-  "Inhoud": "Contents",
   "Sluiten": "Close",
-  "Sluiten X": "Close X",
   "x": "x",
-  "X": "X",
-  "Oefening": "Exercise",
-  "OEFENING": "EXERCISE",
-  "Code-editor": "Code editor",
-  "Editor": "Editor",
-  "Uitvoeren": "Run",
-  "Uitvoer": "Output",
-  "Console-uitvoer": "Console output",
-  "Feedback": "Feedback",
   "Status": "Status",
   "Data": "Data",
   "Diagnose": "Diagnostics",
   "Nog geen data ontvangen.": "No data received yet.",
   "Laatste regel: --": "Last line: --",
-  "Laatste code: --": "Last code: --",
   "Rapport": "Report",
-  "Rapportinstellingen": "Report settings",
   "Wie maakt dit rapport?": "Who is making this report?",
   "Naam": "Name",
-  "Naam:": "Name:",
   "Naam of namen": "Name or names",
   "Klas": "Class",
-  "Klas:": "Class:",
-  "Annuleren": "Cancel",
   "Annuleer": "Cancel",
-  "OK": "OK",
-  "Doorgaan": "Continue",
   "Reset": "Reset",
   "Genereer PDF": "Generate PDF",
-  "Maak PDF": "Create PDF",
-  "Exporteren": "Export",
-  "Exporteren naar PDF": "Export to PDF",
-  "Reeks exporteren naar PDF": "Export series to PDF",
-  "Vooruitgang wissen": "Clear progress",
-  "Voortgang wissen": "Clear progress",
-  "Alleen huidige oefening": "Current exercise only",
-  "Alle voortgang": "All progress",
-  "Volledige reeks": "Full series",
-  "Volledige cursus": "Full course",
-  "Kies wat je wil wissen.": "Choose what you want to clear.",
-  "Donker/Licht": "Dark/Light",
-  "Thema": "Theme",
-  "Donkere/lichte modus": "Dark/light mode",
-  "Donkere of lichte modus": "Dark or light mode",
-  "Formularium": "Reference sheet",
-  "HTML Formularium": "HTML reference sheet",
-  "Python Formularium": "Python reference sheet",
-  "Blockly Formularium": "Blockly reference sheet",
-  "Hulp": "Help",
-  "Help": "Help",
-  "Schema": "Diagram",
-  "Checklist": "Checklist",
   "Onderzoeksvraag": "Research question",
   "Hypothese": "Hypothesis",
   "Besluit en reflectie": "Conclusion and reflection",
@@ -736,19 +664,12 @@ body > header .tab.active {
   "microSD-kaart is FAT32 geformatteerd en geplaatst.": "microSD card is formatted as FAT32 and inserted.",
   "Batterijpack is opgeladen en getest.": "Battery pack is charged and tested.",
   "De correcte Arduino-code staat op het bord.": "The correct Arduino code is on the board.",
-  "Toon waar de projectcode staat": "Show where the project code is",
-  "Code uploaden": "Upload code",
-  "Waar vind ik de Arduino-code?": "Where can I find the Arduino code?",
-  "Deze opstelling werkt pas wanneer de Arduino de juiste projectcode heeft gekregen. Je vindt de code tussen de andere bronbestanden.": "This setup only works after the Arduino has received the correct project code. You can find the code with the other source files.",
-  "Open RobbeW/projectfijnstof op GitHub": "Open RobbeW/projectfijnstof on GitHub",
-  "Sluit codehulp": "Close code help",
   "Arduino of demomodus": "Arduino or demo mode",
   "Verbind de Arduino via WebSerial. Geen sensor beschikbaar? Start de demomodus en oefen het meetverloop.": "Connect the Arduino through WebSerial. No sensor available? Start demo mode and practise the measurement flow.",
   "Verbind live via WebSerial, start de demomodus of upload een CSV-log van de microSD-kaart.": "Connect live through WebSerial, start demo mode, or upload a CSV log from the microSD card.",
   "Verbind Arduino": "Connect Arduino",
   "Start demomodus": "Start demo mode",
   "Upload log-bestand": "Upload log file",
-  "Geen logbestand gekozen.": "No log file selected.",
   "Verwachte regel: tijd_ms, PM1, PM2.5, PM10, AQI.": "Expected line: time_ms, PM1, PM2.5, PM10, AQI.",
   "Meetreeks": "Measurement series",
   "Naam meetreeks": "Series name",
@@ -785,52 +706,7 @@ body > header .tab.active {
   "Wat viel op in de data?": "What stood out in the data?",
   "Wat zou je aanpassen aan je meetopstelling of meetplan?": "What would you change about your setup or measurement plan?"
 };
-  const PATTERNS = [
-  {
-    "pattern": "^Voortgang: (.+)$",
-    "replacement": "Progress: $1"
-  },
-  {
-    "pattern": "^Snelheid: (.+) ms/stap$",
-    "replacement": "Speed: $1 ms/step"
-  },
-  {
-    "pattern": "^Snelheid: (.+)$",
-    "replacement": "Speed: $1"
-  },
-  {
-    "pattern": "^Pogingen: (.+) \\| Tijd: (.+)$",
-    "replacement": "Attempts: $1 | Time: $2"
-  },
-  {
-    "pattern": "^Level (.+)$",
-    "replacement": "Level $1"
-  },
-  {
-    "pattern": "^Turtle Level$",
-    "replacement": "Turtle level"
-  },
-  {
-    "pattern": "^Open: (.+)$",
-    "replacement": "Open: $1"
-  },
-  {
-    "pattern": "^Gesloten: (.+)$",
-    "replacement": "Closed: $1"
-  },
-  {
-    "pattern": "^Status: (.+)$",
-    "replacement": "Status: $1"
-  },
-  {
-    "pattern": "^Ronde (.+)$",
-    "replacement": "Round $1"
-  },
-  {
-    "pattern": "^dt = (.+) s\\. (.+)$",
-    "replacement": "dt = $1 s. $2"
-  }
-];
+  const PATTERNS = [];
   const META = {
   "title": "Particulate Matter Platform",
   "description": "Measurement platform for Project Particulate Matter with WebSerial, demo mode, measurement series, charts, CSV export and PDF reporting."

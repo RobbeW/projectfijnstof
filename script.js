@@ -51,7 +51,6 @@ window.addEventListener("DOMContentLoaded", () => {
     btnDemo: $("btn-demo"),
     inputLogFile: $("input-log-file"),
     btnImportLog: $("btn-import-log"),
-    fileImportStatus: $("file-import-status"),
     diagnosticSummary: $("diagnostic-summary"),
     diagnosticList: $("diagnostic-list"),
     serialPreview: $("serial-preview"),
@@ -82,9 +81,6 @@ window.addEventListener("DOMContentLoaded", () => {
     inputConclusion: $("input-conclusion"),
     inputReflection: $("input-reflection"),
     btnReport: $("btn-report"),
-    btnCodeHelp: $("btn-code-help"),
-    btnCloseCodeHelp: $("btn-close-code-help"),
-    codeHelpModal: $("code-help-modal"),
     reportModal: $("report-modal"),
     reportForm: $("report-form"),
     reportNames: $("report-names"),
@@ -153,15 +149,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     els.btnExportCsv.addEventListener("click", exportCsv);
     els.btnReport.addEventListener("click", openReportModal);
-    els.btnCodeHelp.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      openCodeHelpModal();
-    });
-    els.btnCloseCodeHelp.addEventListener("click", closeCodeHelpModal);
-    els.codeHelpModal.addEventListener("click", (event) => {
-      if (event.target === els.codeHelpModal) closeCodeHelpModal();
-    });
     els.btnCancelReport.addEventListener("click", closeReportModal);
     els.btnReportBack.addEventListener("click", closeReportModal);
     els.reportModal.addEventListener("click", (event) => {
@@ -378,9 +365,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   async function handleLogFileChoice(event) {
     const file = event.target.files?.[0] || null;
-    els.fileImportStatus.textContent = file
-      ? `${file.name} (${formatFileSize(file.size)})`
-      : "Geen logbestand gekozen.";
     if (file) await importLogFile(file);
     event.target.value = "";
   }
@@ -391,11 +375,10 @@ window.addEventListener("DOMContentLoaded", () => {
       const result = parseLogCsv(text);
       const importedTrials = importLogResult(result, file.name);
       const sampleTotal = importedTrials.reduce((total, trial) => total + trial.samples.length, 0);
-      els.fileImportStatus.textContent = `${file.name}: ${sampleTotal} meetpunten geladen.`;
       updateDiagnostics(
         result.warnings.length ? "SD-log geladen met overgeslagen regels." : "SD-log geladen.",
         [
-          `${importedTrials.length} meetreeks(en) geïmporteerd uit ${file.name}.`,
+          `${importedTrials.length} meetreeks(en) en ${sampleTotal} meetpunten geïmporteerd uit ${file.name}.`,
           "Gebruik de tijdlijn of Speel af om de meting opnieuw te bekijken.",
           ...result.warnings.slice(0, 3),
         ]
@@ -1032,16 +1015,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     els.reportModal.classList.remove("hidden");
     els.reportNames.focus();
-  }
-
-  function openCodeHelpModal() {
-    els.codeHelpModal.classList.remove("hidden");
-    els.btnCloseCodeHelp.focus();
-  }
-
-  function closeCodeHelpModal() {
-    els.codeHelpModal.classList.add("hidden");
-    els.btnCodeHelp.focus();
   }
 
   function closeReportModal() {
