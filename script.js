@@ -23,6 +23,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const SAMPLE_INTERVAL_MS = 5000;
   const DEMO_INTERVAL_MS = 1000;
   const LEGACY_INTERVAL_MS = 5000;
+  const PLATFORM_STORAGE_KEY = "aiindeklas:projectfijnstof:platform:v1";
+  const AUTOSAVE_DELAY_MS = 700;
   const CHART_COLORS = {
     pm1: "#5200FF",
     pm25: "#D0006F",
@@ -110,7 +112,10 @@ window.addEventListener("DOMContentLoaded", () => {
     playbackIndex: 0,
     playbackSpeed: 10,
     playbackPlaying: false,
+    autosaveFailed: false,
   };
+
+  let autosaveTimer = null;
 
   initialize();
 
@@ -118,14 +123,23 @@ window.addEventListener("DOMContentLoaded", () => {
     initializeCharts();
     bindEvents();
     updateCompatibilityNotice();
-    updateDiagnostics("Nog geen data ontvangen.", [
-      "Verbind de Arduino of start de demomodus.",
-      "Verwachte regel: tijd_ms, PM1, PM2.5, PM10, AQI.",
-    ]);
-    createTrial();
+    const restored = restoreSavedState();
+    if (restored) {
+      updateDiagnostics("Vorige voortgang hersteld uit deze browser.", [
+        "Meet opnieuw verbinden blijft nodig, maar de bewaarde meetreeksen en antwoorden staan terug klaar.",
+      ]);
+    } else {
+      updateDiagnostics("Nog geen data ontvangen.", [
+        "Verbind de Arduino of start de demomodus.",
+        "Verwachte regel: tijd_ms, PM1, PM2.5, PM10, AQI.",
+      ]);
+      createTrial({ skipAutosave: true });
+    }
     updateControls();
     updateWorkflowState();
     renderTables();
+    updateCharts();
+    savePlatformState();
   }
 
   function bindEvents() {
@@ -142,10 +156,12 @@ window.addEventListener("DOMContentLoaded", () => {
     els.playbackSpeed.addEventListener("change", () => {
       state.playbackSpeed = Number(els.playbackSpeed.value) || 10;
       if (state.playbackPlaying) restartPlaybackTimer();
+      scheduleAutosave();
     });
     els.playbackRange.addEventListener("input", () => {
       pausePlayback();
       setPlaybackIndex(Number(els.playbackRange.value) || 0);
+      scheduleAutosave();
     });
     els.btnExportCsv.addEventListener("click", exportCsv);
     els.btnReport.addEventListener("click", openReportModal);
@@ -156,6 +172,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     els.reportForm.addEventListener("submit", (event) => {
       event.preventDefault();
+      savePlatformState();
       generatePdf();
       closeReportModal();
     });
@@ -169,17 +186,30 @@ window.addEventListener("DOMContentLoaded", () => {
       els.inputCondition,
       els.inputNote,
       els.inputConclusion,
-    ].forEach((input) => input.addEventListener("input", updateWorkflowState));
+      els.inputReflection,
+      els.reportNames,
+      els.reportClass,
+    ].forEach((input) => input.addEventListener("input", () => {
+      updateWorkflowState();
+      scheduleAutosave();
+    }));
 
     [els.inputTrialName, els.inputCondition, els.inputNote, els.inputLocation, els.inputSource].forEach((input) => {
       input.addEventListener("input", () => {
         updateCurrentTrialMeta();
         renderTrialSummaries();
         updateComparisonChart();
+        scheduleAutosave();
       });
     });
 
-    els.setupChecklist.addEventListener("change", updateWorkflowState);
+    els.setupChecklist.addEventListener("change", () => {
+      updateWorkflowState();
+      scheduleAutosave();
+    });
+
+    window.addEventListener("pagehide", () => savePlatformState());
+    window.addEventListener("beforeunload", () => savePlatformState());
 
     if ("IntersectionObserver" in window) {
       const observer = new IntersectionObserver((entries) => {
@@ -208,6 +238,215 @@ window.addEventListener("DOMContentLoaded", () => {
       els.compatibilityNotice.classList.remove("hidden");
       els.compatibilityNotice.innerHTML = messages.map((message) => `<p>${escapeHtml(message)}</p>`).join("");
     }
+  }
+
+  function restoreSavedState() {
+    const saved = loadSavedState();
+    if (!saved) return false;
+
+    const restoredTrials = Array.isArray(saved.trials)
+      ? saved.trials.map((trial, index) => hydrateTrial(trial, index + 1)).filter(Boolean)
+      : [];
+
+    state.trials = restoredTrials.length ? restoredTrials : [makeEmptyTrial(1)];
+    state.currentTrial = state.trials.find((trial) => trial.id === saved.currentTrialId) || state.trials[0];
+    state.source = saved.source === "file" ? "file" : null;
+    state.latestPacket = hydrateSample(saved.latestPacket) || lastSample(state.currentTrial);
+    state.playbackSpeed = numberOr(saved.playbackSpeed, 10);
+    state.playbackIndex = Math.max(0, Math.floor(numberOr(saved.playbackIndex, 0)));
+    state.playbackTrial = state.trials.find((trial) => trial.id === saved.playbackTrialId)
+      || (state.currentTrial?.mode === "file" ? state.currentTrial : null);
+    state.playbackPlaying = false;
+
+    applyStoredForm(saved.form);
+    applyActiveTrialToForm();
+
+    if (state.playbackTrial?.samples.length) {
+      state.playbackIndex = clamp(state.playbackIndex, 0, state.playbackTrial.samples.length - 1);
+      state.currentTrial = state.playbackTrial;
+      state.latestPacket = state.playbackTrial.samples[state.playbackIndex];
+    } else {
+      state.playbackIndex = 0;
+    }
+
+    if (state.latestPacket) updateMetrics(state.latestPacket);
+    els.playbackSpeed.value = String(state.playbackSpeed);
+    els.connectionStatus.textContent = state.source === "file" ? "SD-log hersteld" : "Voortgang hersteld";
+    renderTables();
+    updateCharts();
+    updateControls();
+    updateWorkflowState();
+    return true;
+  }
+
+  function loadSavedState() {
+    try {
+      const raw = localStorage.getItem(PLATFORM_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.version === 1 ? parsed : null;
+    } catch (error) {
+      console.warn("Kon opgeslagen fijnstofvoortgang niet laden:", error);
+      return null;
+    }
+  }
+
+  function scheduleAutosave() {
+    if (autosaveTimer) window.clearTimeout(autosaveTimer);
+    autosaveTimer = window.setTimeout(() => {
+      autosaveTimer = null;
+      savePlatformState();
+    }, AUTOSAVE_DELAY_MS);
+  }
+
+  function savePlatformState() {
+    if (autosaveTimer) {
+      window.clearTimeout(autosaveTimer);
+      autosaveTimer = null;
+    }
+
+    try {
+      localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(serializePlatformState()));
+      state.autosaveFailed = false;
+    } catch (error) {
+      if (!state.autosaveFailed) {
+        state.autosaveFailed = true;
+        updateDiagnostics("Automatisch bewaren lukt niet in deze browsercontext.", [
+          "Download zeker een CSV of PDF voordat je de pagina sluit.",
+          String(error),
+        ]);
+      }
+    }
+  }
+
+  function serializePlatformState() {
+    updateCurrentTrialMeta();
+    return {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      source: state.source === "file" ? "file" : null,
+      currentTrialId: state.currentTrial?.id || null,
+      playbackTrialId: state.playbackTrial?.id || null,
+      playbackIndex: state.playbackIndex,
+      playbackSpeed: state.playbackSpeed,
+      latestPacket: state.latestPacket ? serializeSample(state.latestPacket) : null,
+      form: {
+        question: els.inputQuestion.value,
+        hypothesis: els.inputHypothesis.value,
+        location: els.inputLocation.value,
+        source: els.inputSource.value,
+        conclusion: els.inputConclusion.value,
+        reflection: els.inputReflection.value,
+        reportNames: els.reportNames.value,
+        reportClass: els.reportClass.value,
+        setupChecked: [...els.setupChecklist.querySelectorAll('input[type="checkbox"]')].map((input) => input.checked),
+      },
+      trials: state.trials.map(serializeTrial),
+    };
+  }
+
+  function serializeTrial(trial) {
+    return {
+      id: trial.id,
+      name: trial.name,
+      location: trial.location,
+      source: trial.source,
+      condition: trial.condition,
+      note: trial.note,
+      samples: trial.samples.map(serializeSample),
+      startedAt: trial.startedAt ? trial.startedAt.toISOString() : null,
+      stoppedAt: trial.stoppedAt ? trial.stoppedAt.toISOString() : null,
+      deviceStartMs: trial.deviceStartMs,
+      mode: trial.mode || "",
+      importedFile: trial.importedFile || "",
+    };
+  }
+
+  function serializeSample(sample) {
+    return [
+      sample.deviceMs,
+      sample.elapsedMs,
+      sample.pm1,
+      sample.pm25,
+      sample.pm10,
+      sample.aqi,
+      sample.source || "",
+    ];
+  }
+
+  function hydrateTrial(savedTrial, fallbackNumber) {
+    if (!savedTrial || typeof savedTrial !== "object") return null;
+    const trial = makeEmptyTrial(fallbackNumber);
+    trial.id = String(savedTrial.id || trial.id);
+    trial.name = String(savedTrial.name || trial.name);
+    trial.location = String(savedTrial.location || "");
+    trial.source = String(savedTrial.source || "");
+    trial.condition = String(savedTrial.condition || "");
+    trial.note = String(savedTrial.note || "");
+    trial.samples = Array.isArray(savedTrial.samples)
+      ? savedTrial.samples.map(hydrateSample).filter(Boolean)
+      : [];
+    trial.startedAt = parseStoredDate(savedTrial.startedAt);
+    trial.stoppedAt = parseStoredDate(savedTrial.stoppedAt);
+    trial.deviceStartMs = nullableNumber(savedTrial.deviceStartMs);
+    trial.mode = String(savedTrial.mode || "");
+    trial.importedFile = String(savedTrial.importedFile || "");
+    return trial;
+  }
+
+  function hydrateSample(savedSample) {
+    if (Array.isArray(savedSample)) {
+      const sample = {
+        deviceMs: numberOr(savedSample[0], 0),
+        elapsedMs: numberOr(savedSample[1], 0),
+        pm1: numberOr(savedSample[2], 0),
+        pm25: numberOr(savedSample[3], 0),
+        pm10: numberOr(savedSample[4], 0),
+        aqi: clamp(Math.round(numberOr(savedSample[5], 1)), 1, 6),
+        source: String(savedSample[6] || "restored"),
+      };
+      sample.rawLine = packetToLine(sample);
+      return sample;
+    }
+
+    if (!savedSample || typeof savedSample !== "object") return null;
+    const sample = {
+      deviceMs: numberOr(savedSample.deviceMs, 0),
+      elapsedMs: numberOr(savedSample.elapsedMs, 0),
+      pm1: numberOr(savedSample.pm1, 0),
+      pm25: numberOr(savedSample.pm25, 0),
+      pm10: numberOr(savedSample.pm10, 0),
+      aqi: clamp(Math.round(numberOr(savedSample.aqi, 1)), 1, 6),
+      source: String(savedSample.source || "restored"),
+    };
+    sample.rawLine = String(savedSample.rawLine || packetToLine(sample));
+    return sample;
+  }
+
+  function applyStoredForm(form) {
+    if (!form || typeof form !== "object") return;
+    els.inputQuestion.value = String(form.question || "");
+    els.inputHypothesis.value = String(form.hypothesis || "");
+    els.inputLocation.value = String(form.location || "");
+    els.inputSource.value = String(form.source || "");
+    els.inputConclusion.value = String(form.conclusion || "");
+    els.inputReflection.value = String(form.reflection || "");
+    els.reportNames.value = String(form.reportNames || "");
+    els.reportClass.value = String(form.reportClass || "");
+
+    const checked = Array.isArray(form.setupChecked) ? form.setupChecked : [];
+    [...els.setupChecklist.querySelectorAll('input[type="checkbox"]')].forEach((input, index) => {
+      input.checked = Boolean(checked[index]);
+    });
+  }
+
+  function applyActiveTrialToForm() {
+    if (!state.currentTrial) return;
+    els.inputTrialName.value = state.currentTrial.name || "";
+    els.inputLocation.value = state.currentTrial.location || els.inputLocation.value;
+    els.inputSource.value = state.currentTrial.source || els.inputSource.value;
+    els.inputCondition.value = state.currentTrial.condition || "";
+    els.inputNote.value = state.currentTrial.note || "";
   }
 
   function initializeCharts() {
@@ -450,6 +689,7 @@ window.addEventListener("DOMContentLoaded", () => {
     updateCharts();
     updateControls();
     updateWorkflowState();
+    savePlatformState();
 
     return importedTrials;
   }
@@ -677,6 +917,7 @@ window.addEventListener("DOMContentLoaded", () => {
     updateCharts();
     updateControls();
     updateWorkflowState();
+    if (state.isMeasuring) scheduleAutosave();
     if (totalSampleCount() === 0) {
       updateDiagnostics("Data ontvangen.", ["Klik op Start meting om meetpunten in een meetreeks op te slaan."]);
     }
@@ -692,6 +933,7 @@ window.addEventListener("DOMContentLoaded", () => {
       updateDiagnostics("Demomodus gestopt.", ["Verbind Arduino of start opnieuw een demo."]);
       updateControls();
       updateWorkflowState();
+      scheduleAutosave();
       return;
     }
     pausePlayback();
@@ -706,6 +948,7 @@ window.addEventListener("DOMContentLoaded", () => {
     state.demoTimer = window.setInterval(makeDemoTick, DEMO_INTERVAL_MS);
     updateControls();
     updateWorkflowState();
+    scheduleAutosave();
   }
 
   function makeDemoTick() {
@@ -729,18 +972,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function createTrial(options = {}) {
     if (state.isMeasuring) stopMeasurement();
     const number = state.trials.length + 1;
-    const trial = {
-      id: `trial-${Date.now()}-${number}`,
-      name: `Meting ${number}`,
-      location: els.inputLocation?.value.trim() || "",
-      source: els.inputSource?.value.trim() || "",
-      condition: "",
-      note: "",
-      samples: [],
-      startedAt: null,
-      stoppedAt: null,
-      deviceStartMs: null,
-    };
+    const trial = makeEmptyTrial(number);
     state.trials.push(trial);
     state.currentTrial = trial;
     els.inputTrialName.value = trial.name;
@@ -751,6 +983,24 @@ window.addEventListener("DOMContentLoaded", () => {
     updateControls();
     updateWorkflowState();
     if (options.focusName) els.inputTrialName.focus();
+    if (!options.skipAutosave) scheduleAutosave();
+  }
+
+  function makeEmptyTrial(number) {
+    return {
+      id: `trial-${Date.now()}-${number}`,
+      name: `Meting ${number}`,
+      location: els.inputLocation?.value.trim() || "",
+      source: els.inputSource?.value.trim() || "",
+      condition: "",
+      note: "",
+      samples: [],
+      startedAt: null,
+      stoppedAt: null,
+      deviceStartMs: null,
+      mode: "",
+      importedFile: "",
+    };
   }
 
   function startMeasurement() {
@@ -771,6 +1021,7 @@ window.addEventListener("DOMContentLoaded", () => {
     ]);
     updateControls();
     updateWorkflowState();
+    scheduleAutosave();
   }
 
   function stopMeasurement() {
@@ -788,6 +1039,7 @@ window.addEventListener("DOMContentLoaded", () => {
     updateCharts();
     updateControls();
     updateWorkflowState();
+    savePlatformState();
   }
 
   function updateCurrentTrialMeta() {
@@ -927,6 +1179,7 @@ window.addEventListener("DOMContentLoaded", () => {
     state.playbackIndex = clamp(Math.round(index), 0, Math.max(0, (trial?.samples.length || 1) - 1));
     state.playbackPlaying = false;
     updatePlaybackReadout();
+    scheduleAutosave();
   }
 
   function startPlayback() {
@@ -938,6 +1191,7 @@ window.addEventListener("DOMContentLoaded", () => {
     els.connectionStatus.textContent = "SD-log speelt af";
     restartPlaybackTimer();
     updatePlaybackReadout();
+    scheduleAutosave();
   }
 
   function pausePlayback() {
@@ -950,6 +1204,7 @@ window.addEventListener("DOMContentLoaded", () => {
       els.connectionStatus.textContent = state.source === "file" ? "SD-log geladen" : els.connectionStatus.textContent;
     }
     updatePlaybackReadout();
+    scheduleAutosave();
   }
 
   function resetPlayback() {
@@ -988,6 +1243,7 @@ window.addEventListener("DOMContentLoaded", () => {
     updateLiveChart();
     updatePlaybackReadout();
     updateWorkflowState();
+    scheduleAutosave();
   }
 
   function updatePlaybackReadout() {
@@ -1277,6 +1533,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
+  }
+
+  function lastSample(trial) {
+    return trial?.samples?.length ? trial.samples[trial.samples.length - 1] : null;
+  }
+
+  function numberOr(value, fallback) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
+  function nullableNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function parseStoredDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
   function escapeHtml(value) {

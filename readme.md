@@ -131,7 +131,7 @@ Project Fijnstof/
 
 ## Privacy en opslag
 
-De website gebruikt geen server en geen leerlingenaccounts. Meetgegevens blijven in de browser. Alleen wanneer een leerling zelf een CSV uploadt, CSV exporteert of PDF downloadt, wordt er een lokaal bestand gelezen of bewaard.
+De website gebruikt geen server en geen leerlingenaccounts. Het platform bewaart ingevulde antwoorden, meetreeksen en geïmporteerde microSD-logs automatisch in `localStorage` van dezelfde browser, zodat een verversing of gesloten tabblad niet meteen alle klasmetingen wist. Alleen wanneer een leerling zelf een CSV uploadt, CSV exporteert of PDF downloadt, wordt er een los lokaal bestand gelezen of bewaard.
 
 ## Testen zonder hardware
 
