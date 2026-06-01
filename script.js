@@ -20,6 +20,7 @@ class LineBreakTransformer {
 window.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
   const BAUD_RATE = 9600;
+  const SAMPLE_INTERVAL_MS = 5000;
   const DEMO_INTERVAL_MS = 1000;
   const LEGACY_INTERVAL_MS = 5000;
   const CHART_COLORS = {
@@ -48,6 +49,9 @@ window.addEventListener("DOMContentLoaded", () => {
     setupChecklist: $("setup-checklist"),
     btnConnect: $("btn-connect"),
     btnDemo: $("btn-demo"),
+    inputLogFile: $("input-log-file"),
+    btnImportLog: $("btn-import-log"),
+    fileImportStatus: $("file-import-status"),
     diagnosticSummary: $("diagnostic-summary"),
     diagnosticList: $("diagnostic-list"),
     serialPreview: $("serial-preview"),
@@ -63,6 +67,14 @@ window.addEventListener("DOMContentLoaded", () => {
     metricAqi: $("metric-aqi"),
     metricAqiLabel: $("metric-aqi-label"),
     liveChartCanvas: $("live-chart"),
+    playbackTitle: $("playback-title"),
+    playbackStatus: $("playback-status"),
+    btnPlaybackPlay: $("btn-playback-play"),
+    btnPlaybackPause: $("btn-playback-pause"),
+    btnPlaybackReset: $("btn-playback-reset"),
+    playbackSpeed: $("playback-speed"),
+    playbackRange: $("playback-range"),
+    playbackTime: $("playback-time"),
     comparisonChartCanvas: $("comparison-chart"),
     trialSummaryBody: $("trial-summary-body"),
     sampleBody: $("sample-body"),
@@ -97,6 +109,11 @@ window.addEventListener("DOMContentLoaded", () => {
     fallbackDeviceMs: 0,
     liveChart: null,
     comparisonChart: null,
+    playbackTimer: null,
+    playbackTrial: null,
+    playbackIndex: 0,
+    playbackSpeed: 10,
+    playbackPlaying: false,
   };
 
   initialize();
@@ -118,9 +135,22 @@ window.addEventListener("DOMContentLoaded", () => {
   function bindEvents() {
     els.btnConnect.addEventListener("click", connectSerial);
     els.btnDemo.addEventListener("click", toggleDemoMode);
+    els.inputLogFile.addEventListener("change", handleLogFileChoice);
+    els.btnImportLog.addEventListener("click", () => els.inputLogFile.click());
     els.btnNewTrial.addEventListener("click", () => createTrial({ focusName: true }));
     els.btnStart.addEventListener("click", startMeasurement);
     els.btnStop.addEventListener("click", stopMeasurement);
+    els.btnPlaybackPlay.addEventListener("click", startPlayback);
+    els.btnPlaybackPause.addEventListener("click", pausePlayback);
+    els.btnPlaybackReset.addEventListener("click", resetPlayback);
+    els.playbackSpeed.addEventListener("change", () => {
+      state.playbackSpeed = Number(els.playbackSpeed.value) || 10;
+      if (state.playbackPlaying) restartPlaybackTimer();
+    });
+    els.playbackRange.addEventListener("input", () => {
+      pausePlayback();
+      setPlaybackIndex(Number(els.playbackRange.value) || 0);
+    });
     els.btnExportCsv.addEventListener("click", exportCsv);
     els.btnReport.addEventListener("click", openReportModal);
     els.btnCodeHelp.addEventListener("click", (event) => {
@@ -241,9 +271,20 @@ window.addEventListener("DOMContentLoaded", () => {
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
+      interaction: { mode: "index", intersect: false },
+      onClick: handleChartClick,
       plugins: {
         legend: { position: "bottom" },
         title: { display: false, text: title },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const label = context.dataset.label || "";
+              const value = Number(context.parsed.y || 0).toFixed(1);
+              return `${label}: ${value}`;
+            },
+          },
+        },
       },
       scales: {
         x: { grid: { color: "#eef2f7" } },
@@ -258,6 +299,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
     try {
+      pausePlayback();
       state.port = await navigator.serial.requestPort();
       await state.port.open({ baudRate: BAUD_RATE });
       state.reader = state.port.readable
@@ -334,6 +376,293 @@ window.addEventListener("DOMContentLoaded", () => {
     ]);
   }
 
+  async function handleLogFileChoice(event) {
+    const file = event.target.files?.[0] || null;
+    els.fileImportStatus.textContent = file
+      ? `${file.name} (${formatFileSize(file.size)})`
+      : "Geen logbestand gekozen.";
+    if (file) await importLogFile(file);
+    event.target.value = "";
+  }
+
+  async function importLogFile(file) {
+    try {
+      const text = await file.text();
+      const result = parseLogCsv(text);
+      const importedTrials = importLogResult(result, file.name);
+      const sampleTotal = importedTrials.reduce((total, trial) => total + trial.samples.length, 0);
+      els.fileImportStatus.textContent = `${file.name}: ${sampleTotal} meetpunten geladen.`;
+      updateDiagnostics(
+        result.warnings.length ? "SD-log geladen met overgeslagen regels." : "SD-log geladen.",
+        [
+          `${importedTrials.length} meetreeks(en) geïmporteerd uit ${file.name}.`,
+          "Gebruik de tijdlijn of Speel af om de meting opnieuw te bekijken.",
+          ...result.warnings.slice(0, 3),
+        ]
+      );
+    } catch (error) {
+      updateDiagnostics("SD-log niet geladen.", [String(error.message || error)]);
+      alert(`Importfout: ${error.message || error}`);
+    }
+  }
+
+  function parseLogCsv(text) {
+    const rows = text
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/)
+      .map((line) => ({ raw: line, trimmed: line.trim() }))
+      .filter((line) => line.trimmed && !line.trimmed.startsWith("#"))
+      .map((line) => ({ raw: line.raw, cells: splitCsvLine(line.raw).map((cell) => cell.trim()) }));
+
+    if (!rows.length) throw new Error("Het bestand bevat geen CSV-meetregels.");
+
+    const hasHeader = looksLikeHeader(rows[0].cells);
+    const headers = hasHeader ? rows[0].cells.map(normalizeHeader) : [];
+    const dataRows = hasHeader ? rows.slice(1) : rows;
+    const packets = [];
+    const groupedRows = [];
+    const warnings = [];
+    const meta = hasHeader ? metaFromHeaderRow(rows[1]?.cells || [], headers) : {};
+
+    dataRows.forEach((row, index) => {
+      try {
+        const packet = hasHeader
+          ? packetFromHeaderRow(row.cells, headers, index)
+          : packetFromCsvRow(row.cells, index);
+        packets.push({ ...packet, rawLine: row.raw });
+        if (hasHeader && hasMetadataHeaders(headers)) {
+          groupedRows.push({
+            packet: { ...packet, rawLine: row.raw },
+            meta: metaFromHeaderRow(row.cells, headers),
+          });
+        }
+      } catch (error) {
+        warnings.push(`Regel ${hasHeader ? index + 2 : index + 1}: ${error.message}`);
+      }
+    });
+
+    if (!packets.length) {
+      const detail = warnings.length ? ` ${warnings.slice(0, 3).join(" ")}` : "";
+      throw new Error(`Geen geldige meetpunten gevonden.${detail}`);
+    }
+
+    return { packets, meta, groupedRows, warnings };
+  }
+
+  function importLogResult(result, filename) {
+    if (state.isMeasuring) stopMeasurement();
+    pausePlayback();
+    removeEmptyCurrentTrial();
+
+    const groups = groupPacketsForImport(result, filename);
+    const importedTrials = groups.map((group) => importTrialFromPackets(group.packets, group.meta));
+    const trial = importedTrials[importedTrials.length - 1];
+
+    state.source = "file";
+    state.latestPacket = trial.samples[trial.samples.length - 1] || null;
+    els.connectionStatus.textContent = "SD-log geladen";
+    if (state.latestPacket) updateMetrics(state.latestPacket);
+    setPlaybackTrial(trial, trial.samples.length - 1);
+    renderTables();
+    updateCharts();
+    updateControls();
+    updateWorkflowState();
+
+    return importedTrials;
+  }
+
+  function groupPacketsForImport(result, filename) {
+    if (!result.groupedRows?.length) {
+      return [{
+        packets: result.packets,
+        meta: {
+          ...result.meta,
+          filename,
+          name: result.meta.name || filename.replace(/\.[^.]+$/, "") || `SD-log ${state.trials.length + 1}`,
+        },
+      }];
+    }
+
+    const groups = new Map();
+    result.groupedRows.forEach((row) => {
+      const name = row.meta.name || filename.replace(/\.[^.]+$/, "") || "SD-log";
+      if (!groups.has(name)) {
+        groups.set(name, {
+          packets: [],
+          meta: {
+            ...row.meta,
+            filename,
+            name,
+          },
+        });
+      }
+      groups.get(name).packets.push(row.packet);
+    });
+    return [...groups.values()];
+  }
+
+  function importTrialFromPackets(packets, meta) {
+    const number = state.trials.length + 1;
+    const firstDeviceMs = packets[0]?.deviceMs ?? 0;
+    const trial = {
+      id: `trial-${Date.now()}-${number}`,
+      name: meta.name || `SD-log ${number}`,
+      location: meta.location || els.inputLocation.value.trim(),
+      source: meta.source || els.inputSource.value.trim(),
+      condition: meta.condition || "microSD-log",
+      note: meta.note || meta.filename || "",
+      samples: packets.map((packet) => ({
+        deviceMs: packet.deviceMs,
+        elapsedMs: Math.max(0, packet.deviceMs - firstDeviceMs),
+        pm1: packet.pm1,
+        pm25: packet.pm25,
+        pm10: packet.pm10,
+        aqi: packet.aqi,
+        source: "file",
+        rawLine: packet.rawLine || packetToLine(packet),
+      })),
+      startedAt: null,
+      stoppedAt: null,
+      deviceStartMs: firstDeviceMs,
+      mode: "file",
+      importedFile: meta.filename || "",
+    };
+
+    state.trials.push(trial);
+    state.currentTrial = trial;
+    els.inputTrialName.value = trial.name;
+    els.inputLocation.value = trial.location;
+    els.inputSource.value = trial.source;
+    els.inputCondition.value = trial.condition;
+    els.inputNote.value = trial.note;
+    return trial;
+  }
+
+  function splitCsvLine(line) {
+    const cells = [];
+    let cell = "";
+    let inQuotes = false;
+
+    for (let index = 0; index < line.length; index++) {
+      const char = line[index];
+      const next = line[index + 1];
+      if (char === '"' && inQuotes && next === '"') {
+        cell += '"';
+        index++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === "," && !inQuotes) {
+        cells.push(cell);
+        cell = "";
+      } else {
+        cell += char;
+      }
+    }
+    cells.push(cell);
+    return cells;
+  }
+
+  function looksLikeHeader(cells) {
+    return cells.some((cell) => /[a-zA-Zµμ]/.test(cell));
+  }
+
+  function normalizeHeader(header) {
+    return String(header || "")
+      .toLowerCase()
+      .replace(/[µμ]/g, "u")
+      .replace(/[^a-z0-9]/g, "");
+  }
+
+  function packetFromHeaderRow(cells, headers, rowIndex) {
+    const msIndex = findHeader(headers, ["tijdms", "timems", "devicems", "millis"]);
+    const secondsIndex = findHeader(headers, ["tijds", "times", "tijd", "time", "t"]);
+    const pm1Index = findHeader(headers, ["pm1", "pm1ugm3"]);
+    const pm25Index = findHeader(headers, ["pm25", "pm25ugm3"]);
+    const pm10Index = findHeader(headers, ["pm10", "pm10ugm3"]);
+    const aqiIndex = findHeader(headers, ["aqi", "europeseaqi", "europeanaqi"]);
+
+    const pm1 = readCsvNumber(cells, pm1Index, "PM1");
+    const pm25 = readCsvNumber(cells, pm25Index, "PM2.5");
+    const pm10 = readCsvNumber(cells, pm10Index, "PM10");
+    const deviceMs = msIndex >= 0
+      ? readCsvNumber(cells, msIndex, "tijd_ms")
+      : secondsIndex >= 0
+        ? readCsvNumber(cells, secondsIndex, "tijd_s") * 1000
+        : (rowIndex + 1) * LEGACY_INTERVAL_MS;
+    const aqi = aqiIndex >= 0
+      ? readCsvNumber(cells, aqiIndex, "AQI")
+      : calculateAqi(pm25, pm10);
+
+    return cleanPacket(deviceMs, pm1, pm25, pm10, aqi);
+  }
+
+  function packetFromCsvRow(cells, rowIndex) {
+    const values = cells.map((cell) => parseCsvNumber(cell));
+    if (![4, 5].includes(values.length) || values.some((value) => !Number.isFinite(value))) {
+      throw new Error("verwacht 4 of 5 numerieke CSV-velden.");
+    }
+
+    if (values.length === 5) {
+      return cleanPacket(values[0], values[1], values[2], values[3], values[4]);
+    }
+
+    return cleanPacket((rowIndex + 1) * LEGACY_INTERVAL_MS, values[0], values[1], values[2], values[3]);
+  }
+
+  function metaFromHeaderRow(cells, headers) {
+    return {
+      name: readOptionalText(cells, headers, ["meetreeks", "measurementseries", "series", "trial"]),
+      location: readOptionalText(cells, headers, ["plek", "meetplek", "location"]),
+      source: readOptionalText(cells, headers, ["bron", "source"]),
+      condition: readOptionalText(cells, headers, ["omstandigheden", "conditions"]),
+      note: readOptionalText(cells, headers, ["notitie", "note"]),
+    };
+  }
+
+  function hasMetadataHeaders(headers) {
+    return ["meetreeks", "measurementseries", "series", "trial"].some((alias) => headers.includes(alias));
+  }
+
+  function readOptionalText(cells, headers, aliases) {
+    const index = findHeader(headers, aliases);
+    return index >= 0 ? String(cells[index] || "").trim() : "";
+  }
+
+  function findHeader(headers, aliases) {
+    return headers.findIndex((header) => aliases.includes(header));
+  }
+
+  function readCsvNumber(cells, index, label) {
+    if (index < 0) throw new Error(`${label} ontbreekt.`);
+    const value = parseCsvNumber(cells[index]);
+    if (!Number.isFinite(value)) throw new Error(`${label} is geen getal.`);
+    return value;
+  }
+
+  function parseCsvNumber(value) {
+    return Number(String(value ?? "").trim().replace(",", "."));
+  }
+
+  function cleanPacket(deviceMs, pm1, pm25, pm10, aqi) {
+    if (![deviceMs, pm1, pm25, pm10, aqi].every(Number.isFinite)) {
+      throw new Error("meetregel bevat ongeldige getallen.");
+    }
+    return {
+      deviceMs: Math.max(0, deviceMs),
+      pm1: clamp(pm1, 0, 1000),
+      pm25: clamp(pm25, 0, 1000),
+      pm10: clamp(pm10, 0, 1000),
+      aqi: clamp(Math.round(aqi), 1, 6),
+    };
+  }
+
+  function removeEmptyCurrentTrial() {
+    if (!state.currentTrial || state.currentTrial.samples.length) return;
+    const index = state.trials.indexOf(state.currentTrial);
+    if (index >= 0) state.trials.splice(index, 1);
+    state.currentTrial = null;
+  }
+
   function packetFromValues(values) {
     if (values.length === 5) {
       return {
@@ -382,6 +711,7 @@ window.addEventListener("DOMContentLoaded", () => {
       updateWorkflowState();
       return;
     }
+    pausePlayback();
     state.source = "demo";
     state.demoMs = 0;
     els.btnDemo.textContent = "Stop demomodus";
@@ -441,7 +771,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function startMeasurement() {
-    if (!state.source) {
+    if (!(state.source === "serial" || state.source === "demo")) {
       alert("Verbind eerst de Arduino of start de demomodus.");
       return;
     }
@@ -520,7 +850,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderSampleTable() {
-    const rows = state.currentTrial?.samples.slice(-8).reverse() || [];
+    const rows = visibleSamplesForCurrentTrial().slice(-8).reverse();
     if (!rows.length) {
       els.sampleBody.innerHTML = '<tr><td colspan="5">Nog geen data.</td></tr>';
       return;
@@ -565,7 +895,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function updateLiveChart() {
     if (!state.liveChart) return;
-    const rows = state.currentTrial?.samples.slice(-120) || [];
+    const rows = visibleSamplesForCurrentTrial({ forChart: true });
     state.liveChart.data.labels = rows.map((sample) => `${(sample.elapsedMs / 1000).toFixed(0)}s`);
     state.liveChart.data.datasets[0].data = rows.map((sample) => sample.pm1);
     state.liveChart.data.datasets[1].data = rows.map((sample) => sample.pm25);
@@ -584,6 +914,115 @@ window.addEventListener("DOMContentLoaded", () => {
     state.comparisonChart.data.datasets[2].data = summaries.map((summary) => summary.avgPm10);
     state.comparisonChart.data.datasets[3].data = summaries.map((summary) => summary.maxAqi * 10);
     state.comparisonChart.update();
+  }
+
+  function visibleSamplesForCurrentTrial(options = {}) {
+    if (!state.currentTrial) return [];
+    const samples = state.currentTrial.samples || [];
+    if (state.playbackTrial === state.currentTrial && samples.length) {
+      return samples.slice(0, state.playbackIndex + 1);
+    }
+    return options.forChart && state.currentTrial.mode !== "file" ? samples.slice(-120) : samples;
+  }
+
+  function handleChartClick(event, points, chart) {
+    if (chart !== state.liveChart || !state.currentTrial?.samples.length) return;
+    const nearest = chart.getElementsAtEventForMode(event, "nearest", { intersect: false }, true)[0];
+    if (!nearest) return;
+    if (state.currentTrial.mode === "file") {
+      pausePlayback();
+      setPlaybackTrial(state.currentTrial, nearest.index);
+    } else {
+      const visibleRows = visibleSamplesForCurrentTrial({ forChart: true });
+      const sample = visibleRows[nearest.index];
+      if (sample) updateMetrics(sample);
+    }
+  }
+
+  function setPlaybackTrial(trial, index = 0) {
+    state.playbackTrial = trial;
+    state.playbackIndex = clamp(Math.round(index), 0, Math.max(0, (trial?.samples.length || 1) - 1));
+    state.playbackPlaying = false;
+    updatePlaybackReadout();
+  }
+
+  function startPlayback() {
+    if (!state.playbackTrial?.samples.length) return;
+    if (state.playbackIndex >= state.playbackTrial.samples.length - 1) {
+      setPlaybackIndex(0);
+    }
+    state.playbackPlaying = true;
+    els.connectionStatus.textContent = "SD-log speelt af";
+    restartPlaybackTimer();
+    updatePlaybackReadout();
+  }
+
+  function pausePlayback() {
+    if (state.playbackTimer) {
+      window.clearInterval(state.playbackTimer);
+      state.playbackTimer = null;
+    }
+    if (state.playbackPlaying) {
+      state.playbackPlaying = false;
+      els.connectionStatus.textContent = state.source === "file" ? "SD-log geladen" : els.connectionStatus.textContent;
+    }
+    updatePlaybackReadout();
+  }
+
+  function resetPlayback() {
+    if (!state.playbackTrial?.samples.length) return;
+    pausePlayback();
+    setPlaybackIndex(0);
+  }
+
+  function restartPlaybackTimer() {
+    if (state.playbackTimer) window.clearInterval(state.playbackTimer);
+    const interval = Math.max(80, SAMPLE_INTERVAL_MS / Math.max(1, state.playbackSpeed));
+    state.playbackTimer = window.setInterval(advancePlayback, interval);
+  }
+
+  function advancePlayback() {
+    if (!state.playbackTrial?.samples.length) {
+      pausePlayback();
+      return;
+    }
+    if (state.playbackIndex >= state.playbackTrial.samples.length - 1) {
+      pausePlayback();
+      setPlaybackIndex(state.playbackTrial.samples.length - 1);
+      return;
+    }
+    setPlaybackIndex(state.playbackIndex + 1);
+  }
+
+  function setPlaybackIndex(index) {
+    if (!state.playbackTrial?.samples.length) return;
+    state.playbackIndex = clamp(Math.round(index), 0, state.playbackTrial.samples.length - 1);
+    const sample = state.playbackTrial.samples[state.playbackIndex];
+    state.currentTrial = state.playbackTrial;
+    state.latestPacket = sample;
+    updateMetrics(sample);
+    renderSampleTable();
+    updateLiveChart();
+    updatePlaybackReadout();
+    updateWorkflowState();
+  }
+
+  function updatePlaybackReadout() {
+    const trial = state.playbackTrial;
+    const hasPlayback = Boolean(trial?.samples.length);
+    const sample = hasPlayback ? trial.samples[state.playbackIndex] : null;
+    els.btnPlaybackPlay.disabled = !hasPlayback || state.playbackPlaying;
+    els.btnPlaybackPause.disabled = !hasPlayback || !state.playbackPlaying;
+    els.btnPlaybackReset.disabled = !hasPlayback;
+    els.playbackRange.disabled = !hasPlayback;
+    els.playbackSpeed.disabled = !hasPlayback;
+    els.playbackRange.max = hasPlayback ? String(trial.samples.length - 1) : "0";
+    els.playbackRange.value = hasPlayback ? String(state.playbackIndex) : "0";
+    els.playbackTitle.textContent = hasPlayback ? trial.name : "Liveweergave";
+    els.playbackTime.textContent = sample ? formatDuration(sample.elapsedMs) : "0 s";
+    els.playbackStatus.textContent = hasPlayback
+      ? `${state.playbackIndex + 1}/${trial.samples.length} meetpunten · ${state.playbackPlaying ? "afspelen" : "gepauzeerd"}`
+      : "Nog geen SD-log geladen.";
   }
 
   function openReportModal() {
@@ -731,11 +1170,12 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateControls() {
-    const hasSource = Boolean(state.source);
-    els.btnStart.disabled = !hasSource || state.isMeasuring;
+    const hasLiveSource = state.source === "serial" || state.source === "demo";
+    els.btnStart.disabled = !hasLiveSource || state.isMeasuring;
     els.btnStop.disabled = !state.isMeasuring;
     els.btnReport.disabled = !totalSampleCount();
     els.btnExportCsv.disabled = !totalSampleCount();
+    updatePlaybackReadout();
   }
 
   function updateDiagnostics(summary, items = []) {
@@ -745,10 +1185,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function updateWorkflowState() {
     const setupInputs = [...els.setupChecklist.querySelectorAll('input[type="checkbox"]')];
+    const requiredSetupInputs = setupInputs.filter((input) => !input.dataset.optional);
     const completed = {
       prediction: Boolean(els.inputQuestion.value.trim() && els.inputHypothesis.value.trim()),
-      setup: setupInputs.length > 0 && setupInputs.every((input) => input.checked),
-      connect: Boolean(state.source),
+      setup: requiredSetupInputs.length > 0 && requiredSetupInputs.every((input) => input.checked),
+      connect: Boolean(state.source) || totalSampleCount() > 0,
       measurement: totalSampleCount() > 0,
       comparison: trialsWithData().length > 0,
       conclusion: Boolean(els.inputConclusion.value.trim()),
@@ -845,6 +1286,12 @@ window.addEventListener("DOMContentLoaded", () => {
     const seconds = Math.round(ms / 1000);
     if (seconds < 60) return `${seconds} s`;
     return `${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+  }
+
+  function formatFileSize(bytes) {
+    if (!Number.isFinite(bytes)) return "-";
+    if (bytes < 1024) return `${bytes} B`;
+    return `${(bytes / 1024).toFixed(1)} kB`;
   }
 
   function dateStamp() {
