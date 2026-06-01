@@ -369,11 +369,18 @@ body > header .tab.active {
         <label><input type="checkbox" /> Arduino is verbonden met USB.</label>
         <label><input type="checkbox" /> HM330X-sensor is aangesloten op I2C.</label>
         <label><input type="checkbox" /> De sensor krijgt voeding en lucht kan vrij binnen.</label>
+<<<<<<< Updated upstream
         <label class="steam-code-check-item">
           <input type="checkbox" />
           <span>De correcte Arduino-code staat op het bord.</span>
           <button id="btn-code-help" class="steam-code-help-button" type="button" aria-label="Toon waar de projectcode staat" title="Toon waar de projectcode staat">?</button>
         </label>
+=======
+        <label><input type="checkbox" data-optional /> microSD-module is aangesloten op SPI en CS-pin 10.</label>
+        <label><input type="checkbox" data-optional /> microSD-kaart is FAT32 geformatteerd en geplaatst.</label>
+        <label><input type="checkbox" data-optional /> Batterijpack is opgeladen en getest.</label>
+        <label><input type="checkbox" /> De correcte Arduino-code staat op het bord.</label>
+>>>>>>> Stashed changes
       </div>
     </section>
 
@@ -385,12 +392,15 @@ body > header .tab.active {
       <div class="control-panel">
         <div>
           <p>
-            Verbind de Arduino via WebSerial. Geen sensor beschikbaar? Start de demomodus en oefen het meetverloop.
+            Verbind live via WebSerial, start de demomodus of upload een CSV-log van de microSD-kaart.
           </p>
           <div class="toolbar">
             <button id="btn-connect" class="primary-button" type="button">Verbind Arduino</button>
             <button id="btn-demo" class="secondary-button" type="button">Start demomodus</button>
+            <input id="input-log-file" class="visually-hidden" type="file" accept=".csv,text/csv" />
+            <button id="btn-import-log" class="ghost-button" type="button">Upload log-bestand</button>
           </div>
+          <small id="file-import-status" class="import-status">Geen logbestand gekozen.</small>
         </div>
         <div class="diagnostics-panel" aria-live="polite">
           <h3>Diagnose</h3>
@@ -458,6 +468,32 @@ body > header .tab.active {
       </div>
 
       <div class="chart-panel">
+        <div class="playback-controls" aria-label="Afspeelbediening">
+          <div class="playback-readout">
+            <strong id="playback-title">Liveweergave</strong>
+            <small id="playback-status">Nog geen SD-log geladen.</small>
+          </div>
+          <div class="toolbar playback-toolbar">
+            <button id="btn-playback-play" class="secondary-button" type="button" disabled>Speel af</button>
+            <button id="btn-playback-pause" class="ghost-button" type="button" disabled>Pauzeer</button>
+            <button id="btn-playback-reset" class="ghost-button" type="button" disabled>Reset</button>
+            <label class="inline-control">
+              Snelheid
+              <select id="playback-speed">
+                <option value="1">1x</option>
+                <option value="5">5x</option>
+                <option value="10" selected>10x</option>
+                <option value="30">30x</option>
+                <option value="60">60x</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <label class="timeline-control">
+          Tijdlijn
+          <input id="playback-range" type="range" min="0" max="0" value="0" disabled />
+          <span id="playback-time">0 s</span>
+        </label>
         <canvas id="live-chart" aria-label="Live grafiek PM1, PM2.5, PM10 en AQI"></canvas>
       </div>
     </section>
@@ -696,6 +732,9 @@ body > header .tab.active {
   "Arduino is verbonden met USB.": "Arduino is connected by USB.",
   "HM330X-sensor is aangesloten op I2C.": "HM330X sensor is connected to I2C.",
   "De sensor krijgt voeding en lucht kan vrij binnen.": "The sensor has power and air can enter freely.",
+  "microSD-module is aangesloten op SPI en CS-pin 10.": "microSD module is connected to SPI and CS pin 10.",
+  "microSD-kaart is FAT32 geformatteerd en geplaatst.": "microSD card is formatted as FAT32 and inserted.",
+  "Batterijpack is opgeladen en getest.": "Battery pack is charged and tested.",
   "De correcte Arduino-code staat op het bord.": "The correct Arduino code is on the board.",
   "Toon waar de projectcode staat": "Show where the project code is",
   "Code uploaden": "Upload code",
@@ -705,8 +744,11 @@ body > header .tab.active {
   "Sluit codehulp": "Close code help",
   "Arduino of demomodus": "Arduino or demo mode",
   "Verbind de Arduino via WebSerial. Geen sensor beschikbaar? Start de demomodus en oefen het meetverloop.": "Connect the Arduino through WebSerial. No sensor available? Start demo mode and practise the measurement flow.",
+  "Verbind live via WebSerial, start de demomodus of upload een CSV-log van de microSD-kaart.": "Connect live through WebSerial, start demo mode, or upload a CSV log from the microSD card.",
   "Verbind Arduino": "Connect Arduino",
   "Start demomodus": "Start demo mode",
+  "Upload log-bestand": "Upload log file",
+  "Geen logbestand gekozen.": "No log file selected.",
   "Verwachte regel: tijd_ms, PM1, PM2.5, PM10, AQI.": "Expected line: time_ms, PM1, PM2.5, PM10, AQI.",
   "Meetreeks": "Measurement series",
   "Naam meetreeks": "Series name",
@@ -722,6 +764,13 @@ body > header .tab.active {
   "vat PM2.5 en PM10 samen in één score.": "summarises PM2.5 and PM10 in one score.",
   "Europese AQI": "European AQI",
   "Wacht op data": "Waiting for data",
+  "Afspeelbediening": "Playback controls",
+  "Liveweergave": "Live view",
+  "Nog geen SD-log geladen.": "No SD log loaded.",
+  "Speel af": "Play",
+  "Pauzeer": "Pause",
+  "Snelheid": "Speed",
+  "Tijdlijn": "Timeline",
   "Meetreeksen naast elkaar": "Measurement series side by side",
   "Gem. PM2.5": "Avg. PM2.5",
   "Max PM2.5": "Max PM2.5",
