@@ -80,7 +80,7 @@
         </div>
         <a class="btn btn-secondary" href="evaluatie.html">Evaluatie</a>
         <a class="btn btn-primary" href="platform.html">Start platform</a>
-        <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks">
+        <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Navigatie openen">
           Menu
         </button>
       </div>
@@ -468,6 +468,7 @@
       button.classList.toggle("is-active", isActive);
       button.setAttribute("aria-pressed", String(isActive));
     });
+    document.dispatchEvent(new CustomEvent("fijnstof:languagechange"));
     try { localStorage.setItem(LANGUAGE_KEY, useEnglish ? "en" : "nl"); } catch (error) {}
   }
   function initLanguageToggle() {

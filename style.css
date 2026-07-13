@@ -1347,11 +1347,29 @@ th {
   }
 
   .nav-links {
+    display: none;
     order: 3;
     width: 100%;
     justify-content: flex-start;
-    overflow-x: auto;
     padding-top: 0.3rem;
+  }
+
+  .nav-links.is-open {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .menu-button {
+    display: inline-flex;
+  }
+
+  .nav-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .nav-actions .btn {
+    width: auto;
   }
 
   .split,
@@ -1442,8 +1460,7 @@ th {
     grid-template-columns: 1fr;
   }
 
-  .brand-subtitle,
-  .nav-links {
+  .brand-subtitle {
     display: none;
   }
 
@@ -1467,17 +1484,20 @@ th {
     min-width: 0;
   }
 
+  .nav-actions {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .nav-actions .btn,
+  .nav-actions .menu-button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
   .nav-links {
     padding: 0.5rem 0 0.2rem;
-  }
-
-  .nav-links.is-open {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .menu-button {
-    display: inline-flex;
   }
 
   .btn {
