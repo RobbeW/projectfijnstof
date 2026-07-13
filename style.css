@@ -1721,3 +1721,102 @@ th {
     min-width: 0;
   }
 }
+
+/* Landing-page mobile navigation contract. */
+.nav-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.menu-button-icon,
+.menu-button-icon::before,
+.menu-button-icon::after {
+  display: block;
+  width: 1.25rem;
+  height: 2px;
+  background: currentColor;
+  content: "";
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.menu-button-icon {
+  position: relative;
+}
+
+.menu-button-icon::before,
+.menu-button-icon::after {
+  position: absolute;
+  left: 0;
+}
+
+.menu-button-icon::before { top: -0.38rem; }
+.menu-button-icon::after { top: 0.38rem; }
+
+@media (min-width: 761px) {
+  .nav-panel,
+  .nav-panel .nav-links,
+  .nav-panel .nav-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-panel { gap: 0.65rem; }
+  .menu-button { display: none; }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    min-height: 4.5rem;
+    padding: 0.7rem 1rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.7rem;
+  }
+
+  .menu-button {
+    display: inline-flex;
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+  }
+
+  .menu-button[aria-expanded="true"] .menu-button-icon { background: transparent; }
+  .menu-button[aria-expanded="true"] .menu-button-icon::before { transform: translateY(0.38rem) rotate(45deg); }
+  .menu-button[aria-expanded="true"] .menu-button-icon::after { transform: translateY(-0.38rem) rotate(-45deg); }
+
+  .brand-link { min-width: 0; }
+  .brand-mark,
+  .brand-subtitle { display: none; }
+  .brand-title { font-size: 1rem; }
+
+  .nav-panel {
+    display: none;
+    flex-basis: 100%;
+    width: 100%;
+    gap: 0.9rem;
+    padding: 0.6rem 0 0.2rem;
+  }
+
+  .nav-panel.is-open { display: grid; }
+
+  .nav-panel .nav-links,
+  .nav-panel .nav-actions {
+    display: grid;
+    width: 100%;
+    gap: 0.55rem;
+  }
+
+  .nav-panel .nav-links { order: 0; }
+  .nav-panel .nav-actions { order: 1; }
+  .nav-panel .language-toggle { order: 0; }
+
+  .nav-panel .nav-links a,
+  .nav-panel .nav-actions .btn {
+    width: 100%;
+  }
+
+  .nav-panel .nav-links a { padding: 0.8rem 0.75rem; }
+  .nav-panel .language-toggle { justify-self: start; }
+}

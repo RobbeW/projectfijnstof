@@ -25,6 +25,12 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.addEventListener("click", (event) => {
+    if (navLinks?.classList.contains("is-open") && !navLinks.contains(event.target) && !menuButton?.contains(event.target)) {
+      setMenuState(false);
+    }
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && navLinks?.classList.contains("is-open")) {
       setMenuState(false);
@@ -33,7 +39,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("resize", () => {
-    if (window.matchMedia("(min-width: 981px)").matches) setMenuState(false);
+    if (window.matchMedia("(min-width: 761px)").matches) setMenuState(false);
   });
 
   document.addEventListener("fijnstof:languagechange", () => {
