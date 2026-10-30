@@ -1,0 +1,542 @@
+<!doctype html>
+<!--
+  Project Fijnstof - landingspagina
+  Copyright (c) 2026 Robbe Wulgaert
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Robbe Wulgaert, AI in de Klas, robbewulgaert.be" />
+  <meta name="copyright" content="Copyright (c) 2026 Robbe Wulgaert" />
+  <!-- generated:favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png?v=ff7968036640">
+  <link rel="shortcut icon" type="image/png" sizes="64x64" href="./favicon.png?v=ff7968036640">
+  <!-- /generated:favicon -->
+<link rel="stylesheet" href="style.css" />
+<style>@media (max-width: 980px) { .split { grid-template-columns: minmax(0, 1fr); } .cta-band > div { min-width: 0; } h1, h2 { overflow-wrap: anywhere; } .footer-links { flex-wrap: wrap; } }</style>
+  <style id="language-toggle-styles">
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(82, 0, 255, 0.22);
+  border-radius: 999px;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 10px 24px rgba(82, 0, 255, 0.08);
+}
+.language-toggle a {
+  min-width: 44px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--muted, var(--delphi-muted, #625b70));
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.language-toggle a.is-active {
+  background: var(--brand, var(--brand-purple, var(--delphi-blue, #5200FF)));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(82, 0, 255, 0.20);
+}
+.language-toggle a:focus-visible {
+  outline: 3px solid rgba(61, 255, 208, 0.75);
+  outline-offset: 2px;
+}
+</style>
+<!-- generated:seo-head -->
+<title>Particulate Matter Project</title>
+<meta name="description" content="The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://robbew.github.io/projectfijnstof/en.html">
+<link rel="alternate" hreflang="nl-BE" href="https://robbew.github.io/projectfijnstof/">
+<link rel="alternate" hreflang="en" href="https://robbew.github.io/projectfijnstof/en.html">
+<link rel="alternate" hreflang="x-default" href="https://robbew.github.io/projectfijnstof/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Particulate Matter Project">
+<meta property="og:description" content="The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.">
+<meta property="og:url" content="https://robbew.github.io/projectfijnstof/en.html">
+<meta property="og:image" content="https://robbew.github.io/projectfijnstof/media/fijnstof_hero.jpg">
+<meta property="og:image:alt" content="Particulate Matter Project — learning project">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Particulate Matter Project">
+<meta name="twitter:description" content="The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.">
+<meta name="twitter:image" content="https://robbew.github.io/projectfijnstof/media/fijnstof_hero.jpg">
+<meta name="twitter:image:alt" content="Particulate Matter Project — learning project">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://robbew.github.io/projectfijnstof/en.html#webpage","url":"https://robbew.github.io/projectfijnstof/en.html","name":"Particulate Matter Project","description":"The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.","inLanguage":"en","about":{"@id":"https://robbew.github.io/projectfijnstof/#resource"},"mainEntity":{"@id":"https://robbew.github.io/projectfijnstof/#resource"}},{"@type":"Person","@id":"https://robbew.github.io/aiindeklas/#robbe-wulgaert","name":"Robbe Wulgaert","url":"https://robbew.github.io/aiindeklas/"},{"@type":["CreativeWork","LearningResource"],"@id":"https://robbew.github.io/projectfijnstof/#resource","name":"Particulate Matter Project","description":"The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.","url":"https://robbew.github.io/projectfijnstof/","creator":{"@id":"https://robbew.github.io/aiindeklas/#robbe-wulgaert"},"license":"https://robbew.github.io/projectfijnstof/LICENSE.md","inLanguage":"en","teaches":["Comparing measurement series","Reporting research findings"],"abstract":"Sensor: HM330X with Arduino; Measurements: PM1, PM2.5 and PM10; Presentation: PDF report and poster session"}]}</script>
+<!-- /generated:seo-head -->
+<style id="seo-facts-styles">.seo-facts dl { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; } .seo-facts dl > div { min-width: 10rem; } .seo-facts dt { font-weight: 700; } .seo-facts dd { margin: 0; } .language-toggle a { text-decoration: none; }</style>
+</head>
+<body class="landing-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open navigation">
+        <span class="menu-button-icon" aria-hidden="true"></span>
+      </button>
+      <a class="brand-link" href="#top" aria-label="Project Particulate Matter">
+        <span class="brand-copy">
+          <span class="brand-title">Project Particulate Matter</span>
+          <span class="brand-subtitle">Arduino · air quality · research</span>
+        </span>
+      </a>
+      <div class="nav-panel" id="navLinks">
+        <div class="nav-links">
+          <a href="#werking">Assignment</a>
+          <a href="#leerlijn">Learning path</a>
+          <a href="#klas">Teachers</a>
+        </div>
+        <div class="nav-actions">
+          <div class="language-toggle" role="group" aria-label="Language selection">
+            <a href="./" data-language-choice="nl">NL</a>
+            <a href="en.html" data-language-choice="en" class="is-active" aria-current="page">ENG</a>
+          </div>
+          <a class="btn btn-secondary" href="evaluatie.html">Evaluation</a>
+          <a class="btn btn-primary" href="platform.html">Start platform</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="landing-hero" id="top" aria-label="Project Particulate Matter">
+      <div class="hero-content">
+        <h1>Project Particulate Matter</h1>
+        <p class="hero-lead">The Particulate Matter Project has students investigate air quality using a particulate sensor, Arduino and their own measurements.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="platform.html">Start platform</a>
+          <a class="btn btn-secondary" href="#werking">View the assignment</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section landing-intro" id="werking">
+      <div class="section-kicker">How it works</div>
+      <h2 class="section-title">From sensor to poster session.</h2>
+      <div class="steps">
+        <article class="step-card">
+          <span>1</span>
+          <h3>Predict</h3>
+          <p>Students choose a place or situation and note what they expect to measure.</p>
+        </article>
+        <article class="step-card">
+          <span>2</span>
+          <h3>Measure</h3>
+          <p>The Arduino sends PM1, PM2.5, PM10 and AQI to the browser. The graph updates live.</p>
+        </article>
+        <article class="step-card">
+          <span>3</span>
+          <h3>Compare</h3>
+          <p>Multiple measurements come together in an overview with averages, maxima and graphs.</p>
+        </article>
+        <article class="step-card">
+          <span>4</span>
+          <h3>Conclude</h3>
+          <p>The report bundles research question, measurement data, graph, conclusion and reflection.</p>
+        </article>
+        <article class="step-card">
+          <span>5</span>
+          <h3>Poster</h3>
+          <p>Present your findings to the class in a public poster session.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section media-section" id="opstelling" aria-label="Project setup">
+      <div class="split">
+        <article class="audience-card">
+          <p class="section-kicker">The setup</p>
+          <h2 class="section-title">One sensor, one Arduino and a clear measurement.</h2>
+          <p class="section-lead">
+            Students connect the sensor, measure in a real environment and collect their own measurement results.
+          </p>
+          <ul class="bullet-list">
+            <li>The HM330X sensor measures PM1, PM2.5 and PM10.</li>
+            <li>The Arduino sends the measurements to the browser.</li>
+            <li>The webpage helps compare multiple measurement series fairly.</li>
+          </ul>
+        </article>
+
+        <figure class="photo-frame">
+          <img src="media/fijnstof_opstelling.jpg" alt="Arduino particulate matter setup with sensor and wiring" />
+          <figcaption>Project photo of the particulate matter setup in class.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="leren">
+      <div class="section-kicker">What will you learn?</div>
+      <h2 class="section-title">Air quality becomes measurable.</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Particulate matter</h3>
+          <p>PM1, PM2.5 and PM10 become visible as concentrations in µg/m³.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Data processing</h3>
+          <p>Students compare average and maximum values instead of isolated measurement points.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Research</h3>
+          <p>A measurement location, measurement conditions and possible source are explicitly noted.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Reporting</h3>
+          <p>The PDF turns the measurement into a short research output that can be discussed.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Poster</h3>
+          <p>Students process that output into a manageable poster.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section curriculum-section" id="leerlijn">
+      <!-- generated:seo-facts -->
+<section class="seo-facts" aria-label="Project facts"><dl><div><dt>Sensor</dt><dd>HM330X with Arduino</dd></div><div><dt>Measurements</dt><dd>PM1, PM2.5 and PM10</dd></div><div><dt>Presentation</dt><dd>PDF report and poster session</dd></div></dl></section>
+<!-- /generated:seo-facts -->
+      <!-- generated:heading -->
+      <p class="section-kicker">Place in the learning path</p>
+      <h2 class="section-title">From platforms to projects.</h2>
+      <p class="section-lead">The platforms build computational thinking. The projects use that thinking in a cross-curricular assignment in which students build, measure, test and conclude.</p>
+      <!-- /generated:heading -->
+
+      <!-- generated:tree -->
+      <div class="family-tree" aria-label="Learning path of platforms and projects">
+        <div class="tree-root">
+          <a class="tree-node root" href="https://www.aiindeklas.be" target="_blank" rel="noopener">
+            <strong>Learning computational thinking</strong>
+            <span>from blocks to code, from code to research</span>
+          </a>
+        </div>
+        <div class="tree-branches">
+          <div class="tree-branch">
+            <div class="branch-title">Platforms</div>
+            <div class="tree-stack">
+              <a class="tree-node" href="https://robbew.github.io/Blockly/" target="_blank" rel="noopener">
+                <strong>Blockly</strong>
+                <span>visual step-by-step thinking.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/jsindeklas/" target="_blank" rel="noopener">
+                <strong>JavaScript</strong>
+                <span>logic in real code.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/htmlindeklas/" target="_blank" rel="noopener">
+                <strong>HTML</strong>
+                <span>structuring webpages.</span>
+              </a>
+              <div class="delphi-dodona-pair" aria-label="Dodona and Delphi">
+                <a class="tree-node dodona" href="https://dodona.be/nl/courses/2641/" target="_blank" rel="noopener">
+                  <strong>Dodona</strong>
+                  <span>Python in the Classroom with tracking.</span>
+                </a>
+                <a class="tree-node" href="https://robbew.github.io/delphi/" target="_blank" rel="noopener">
+                  <strong>Delphi</strong>
+                  <span>Practice Python in the browser.</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="tree-branch">
+            <div class="branch-title">STEaM projects</div>
+            <div class="tree-stack">
+              <a class="tree-node" href="https://robbew.github.io/smartplants/" target="_blank" rel="noopener">
+                <strong>Smart Plants</strong>
+                <span>Arduino, soil moisture, calibration and data.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/robothand/" target="_blank" rel="noopener">
+                <strong>Robotic hand</strong>
+                <span>Arduino, sensors, servos and movement.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/projectwind/" target="_blank" rel="noopener">
+                <strong>Wind</strong>
+                <span>Micro:bit, energy, voltage and current.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/slimme_vuilnisbak/" target="_blank" rel="noopener">
+                <strong>Smart bin</strong>
+                <span>AI, image recognition, data and microcontrollers.</span>
+              </a>
+              <a class="tree-node" href="https://robbew.github.io/aiindeklas/zelflerende-games/" target="_blank" rel="noopener">
+                <strong>Self-learning games</strong>
+                <span>Getting started with machine learning</span>
+              </a>
+              <a class="tree-node current" href="https://robbew.github.io/projectfijnstof/" target="_blank" rel="noopener" aria-current="page">
+                <strong>Particulate matter</strong>
+                <span>Arduino, air quality, data and poster session.</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /generated:tree -->
+    </section>
+
+    <section class="section split-section teacher-section" id="klas">
+      <div class="teacher-copy">
+        <div class="section-kicker">For teachers</div>
+        <h2 class="section-title">Ready to use in the classroom.</h2>
+        <p>
+          The web version works with real hardware or in demo mode. This lets you prepare the assignment, show it to the class and let students practise without every group immediately needing a working sensor.
+        </p>
+      </div>
+      <ul class="check-list teacher-check-list">
+        <li>No installation or student account.</li>
+        <li>Local libraries for charts and PDF export.</li>
+        <li>Suitable for GitHub Pages.</li>
+        <li>Report with name, class, graph, summary and reflection.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="privacy-license" aria-labelledby="privacy-license-title">
+      <h2 class="section-title" id="privacy-license-title">Privacy and licence</h2>
+      <div class="privacy-license-list">
+        <details class="feature-card privacy-license-details">
+          <summary>Privacy</summary>
+          <div class="privacy-license-content">
+            <p>This project does not use its own analytics or advertising cookies. Input, progress and measurement data are processed in the browser and may be stored locally on the device. A download or export occurs only when the user initiates it. Connected hardware is accessed only after permission is given in the browser. GitHub Pages logs visitors’ IP addresses for security purposes; external services are governed by their provider’s privacy policy.</p>
+            <p><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">Read how GitHub Pages processes technical visitor data.</a></p>
+          </div>
+        </details>
+        <details class="feature-card privacy-license-details">
+          <summary>License</summary>
+          <div class="privacy-license-content">
+            <p>Original project material by Robbe Wulgaert may be used, copied and adapted free of charge for education, provided that ‘Robbe Wulgaert – AI in de Klas’ is clearly displayed, where reasonably practical with a link to the original project. Commercial sale, paid distribution, sublicensing or repackaging as a commercial product is not permitted without prior written permission. Other uses outside education also require prior written permission. Third-party components remain subject to their own licences.</p>
+            <p><a href="LICENSE.md">Read the full licence terms.</a></p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">Project Particulate Matter</div>
+        <p>Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert. Educational use with attribution; no commercial distribution.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#privacy-license">Privacy and licence</a>
+        <a href="https://www.robbewulgaert.be">robbewulgaert.be</a>
+        <a href="https://www.aiindeklas.be">AI in de Klas</a>
+        <a href="platform.html">Platform</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="landing.js" defer></script>
+<script id="language-toggle-script">
+(() => {
+  const LANGUAGE_KEY = "aiindeklas:index-language";
+  const TRANSLATIONS = {
+  "Belangrijke acties": "Key actions",
+  "Hoe werkt het?": "How does it work?",
+  "Start": "Get started",
+  "Footerlinks": "Footer links",
+  "Navigatie openen": "Open navigation",
+  "Projectopstelling": "Project setup",
+  "PDF-export": "PDF export",
+  "Formularium": "Reference sheet",
+  "Arduino fijnstofopstelling met sensor en bedrading": "Arduino particulate matter setup with sensor and wiring",
+  "Snel inzetbaar in de klas.": "Ready to use in the classroom.",
+  // generated:translations
+  "Plaats in de leerlijn": "Place in the learning path",
+  "Van platformen naar projecten.": "From platforms to projects.",
+  "De platformen bouwen het computationeel denken op. De projecten gebruiken dat denken in een vakoverschrijdende opdracht waarin leerlingen bouwen, meten, testen en besluiten.": "The platforms build computational thinking. The projects use that thinking in a cross-curricular assignment in which students build, measure, test and conclude.",
+  "Leerlijn van platformen en projecten": "Learning path of platforms and projects",
+  "Leren computationeel denken": "Learning computational thinking",
+  "van blokken naar code, van code naar onderzoek": "from blocks to code, from code to research",
+  "Blockly": "Blockly",
+  "visueel denken in stappen.": "visual step-by-step thinking.",
+  "JavaScript": "JavaScript",
+  "logica in echte code.": "logic in real code.",
+  "HTML": "HTML",
+  "webpagina's structureren.": "structuring webpages.",
+  "Dodona": "Dodona",
+  "Python in de Klas met opvolging.": "Python in the Classroom with tracking.",
+  "Delphi": "Delphi",
+  "Python oefenen in de browser.": "Practice Python in the browser.",
+  "Smart Plants": "Smart Plants",
+  "Arduino, bodemvochtigheid, kalibratie en data.": "Arduino, soil moisture, calibration and data.",
+  "Robothand": "Robotic hand",
+  "Arduino, sensoren, servo's en beweging.": "Arduino, sensors, servos and movement.",
+  "Wind": "Wind",
+  "Micro:bit, energie, spanning en stroom.": "Micro:bit, energy, voltage and current.",
+  "Slimme vuilnisbak": "Smart bin",
+  "AI, beeldherkenning, data en microcontrollers.": "AI, image recognition, data and microcontrollers.",
+  "Zelflerende games": "Self-learning games",
+  "Aan de slag met machine learning": "Getting started with machine learning",
+  "Fijnstof": "Particulate matter",
+  "Arduino, luchtkwaliteit, data en postersessie.": "Arduino, air quality, data and poster session.",
+  "Platformen": "Platforms",
+  "STEaM-projecten": "STEaM projects",
+  "Dodona en Delphi": "Dodona and Delphi",
+  // /generated:translations
+  "Privacy en licentie": "Privacy and licence",
+  "Dit project gebruikt geen eigen analytics of advertentiecookies. Invoer, voortgang en meetgegevens worden in de browser verwerkt en kunnen lokaal op het toestel worden bewaard. Een download of export gebeurt alleen wanneer de gebruiker die zelf start. Toegang tot aangesloten hardware gebeurt alleen na toestemming in de browser. GitHub Pages registreert het IP-adres van bezoekers voor beveiligingsdoeleinden; externe diensten vallen onder het privacybeleid van hun aanbieder.": "This project does not use its own analytics or advertising cookies. Input, progress and measurement data are processed in the browser and may be stored locally on the device. A download or export occurs only when the user initiates it. Connected hardware is accessed only after permission is given in the browser. GitHub Pages logs visitors’ IP addresses for security purposes; external services are governed by their provider’s privacy policy.",
+  "Lees hoe GitHub Pages technische bezoekgegevens verwerkt.": "Read how GitHub Pages processes technical visitor data.",
+  "Educatief gebruik met naamsvermelding": "Educational use with attribution",
+  "Het oorspronkelijke projectmateriaal van Robbe Wulgaert mag gratis worden gebruikt, gekopieerd en aangepast voor onderwijs, op voorwaarde dat “Robbe Wulgaert – AI in de Klas” duidelijk zichtbaar wordt vermeld, waar redelijkerwijs mogelijk met een link naar het oorspronkelijke project. Commerciële verkoop, betaalde verspreiding, sublicentiëring of herverpakking als commercieel product is niet toegestaan zonder voorafgaande schriftelijke toestemming. Voor ander gebruik buiten onderwijs is ook voorafgaande schriftelijke toestemming nodig. Componenten van derden blijven onder hun eigen licenties vallen.": "Original project material by Robbe Wulgaert may be used, copied and adapted free of charge for education, provided that ‘Robbe Wulgaert – AI in de Klas’ is clearly displayed, where reasonably practical with a link to the original project. Commercial sale, paid distribution, sublicensing or repackaging as a commercial product is not permitted without prior written permission. Other uses outside education also require prior written permission. Third-party components remain subject to their own licences.",
+  "Lees de volledige licentievoorwaarden.": "Read the full licence terms.",
+  "Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert. Educatief gebruik met naamsvermelding; geen commerciële verspreiding.": "Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert. Educational use with attribution; no commercial distribution.",
+  "Spring naar inhoud": "Skip to content",
+  "Spring naar hoofdinhoud": "Skip to main content",
+  "Hoofdnavigatie": "Main navigation",
+  "Paginaonderdelen": "Page sections",
+  "Taalkeuze": "Language selection",
+  "Nederlands kiezen": "Choose Dutch",
+  "Engels kiezen": "Choose English",
+  "Evaluatie": "Evaluation",
+  "Opdracht": "Assignment",
+  "Werking": "How it works",
+  "Wat leer je?": "What will you learn?",
+  "Onderdelen": "Components",
+  "Familie": "Family",
+  "Voor leerkrachten": "For teachers",
+  "Leerkrachten": "Teachers",
+  "Leerlijn": "Learning path",
+  "Benodigdheden": "Materials",
+  "Privacy": "Privacy",
+  "Opstelling": "Setup",
+  "Gebruik": "Use",
+  "README": "README",
+  "Platform": "Platform",
+  "Pythia": "Pythia",
+  "Start leerplatform": "Start learning platform",
+  "Start platform": "Start platform",
+  "Menu": "Menu",
+  "Bekijk de opdracht": "View the assignment",
+  "Lees README": "Read README",
+  "Leerplatform": "Learning platform",
+  "Onderzoeksplatform": "Research platform",
+  "Oefeningmaker": "Exercise builder",
+  "Open oefeningmaker": "Open exercise builder",
+  "Slimme Vuilnisbak": "Smart Bin",
+  "Geen installatie of leerlingenaccount.": "No installation or student account.",
+  "Lokale bibliotheken voor grafieken en PDF-export.": "Local libraries for charts and PDF export.",
+  "Geschikt voor GitHub Pages.": "Suitable for GitHub Pages.",
+  "robbewulgaert.be": "robbewulgaert.be",
+  "AI in de Klas": "AI in de Klas",
+  "Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be": "Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be",
+  "Auteur: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert.": "Author: Robbe Wulgaert · AI in de Klas · robbewulgaert.be · © 2026 Robbe Wulgaert.",
+  "Robbe Wulgaert, AI in de Klas, robbewulgaert.be": "Robbe Wulgaert, AI in de Klas, robbewulgaert.be",
+  "Licentie": "License",
+  "Third-party notices": "Third-party notices",
+  "Contact": "Contact",
+  "Project Fijnstof": "Project Particulate Matter",
+  "Arduino · luchtkwaliteit · onderzoek": "Arduino · air quality · research",
+  "Leerlingen formuleren een onderzoeksvraag, meten fijnstof in hun omgeving, vergelijken meetmomenten en schrijven een besluit op basis van eigen data.": "Students formulate a research question, measure particulate matter in their environment, compare measurement moments and write a conclusion based on their own data.",
+  "Van sensor naar postersessie.": "From sensor to poster session.",
+  "Voorspel": "Predict",
+  "Leerlingen kiezen een plek of situatie en noteren wat ze verwachten te meten.": "Students choose a place or situation and note what they expect to measure.",
+  "Meet": "Measure",
+  "De Arduino stuurt PM1, PM2.5, PM10 en AQI naar de browser. De grafiek loopt live mee.": "The Arduino sends PM1, PM2.5, PM10 and AQI to the browser. The graph updates live.",
+  "Vergelijk": "Compare",
+  "Meerdere metingen komen samen in een overzicht met gemiddelden, maxima en grafieken.": "Multiple measurements come together in an overview with averages, maxima and graphs.",
+  "Besluit": "Conclude",
+  "Het rapport bundelt onderzoeksvraag, meetgegevens, grafiek, besluit en reflectie.": "The report bundles research question, measurement data, graph, conclusion and reflection.",
+  "Poster": "Poster",
+  "Presenteer jouw bevindingen aan de klas met een publieke postersessie.": "Present your findings to the class in a public poster session.",
+  "De opstelling": "The setup",
+  "Een sensor, een Arduino en een duidelijke meting.": "One sensor, one Arduino and a clear measurement.",
+  "Leerlingen sluiten de sensor aan, meten in een echte omgeving en verzamelen zo hun eigen meetresultaten.": "Students connect the sensor, measure in a real environment and collect their own measurement results.",
+  "De HM330X-sensor meet PM1, PM2.5 en PM10.": "The HM330X sensor measures PM1, PM2.5 and PM10.",
+  "De Arduino stuurt de meetwaarden naar de browser.": "The Arduino sends the measurements to the browser.",
+  "De webpagina helpt om meerdere meetreeksen eerlijk te vergelijken.": "The webpage helps compare multiple measurement series fairly.",
+  "Projectfoto van de fijnstofopstelling in de klas.": "Project photo of the particulate matter setup in class.",
+  "Luchtkwaliteit wordt meetbaar.": "Air quality becomes measurable.",
+  "PM1, PM2.5 en PM10 worden zichtbaar als concentratie in µg/m³.": "PM1, PM2.5 and PM10 become visible as concentrations in µg/m³.",
+  "Dataverwerking": "Data processing",
+  "Leerlingen vergelijken gemiddelde en maximale waarden in plaats van losse meetpunten.": "Students compare average and maximum values instead of isolated measurement points.",
+  "Onderzoek": "Research",
+  "Een meetplek, meetomstandigheden en mogelijke bron worden expliciet genoteerd.": "A measurement location, measurement conditions and possible source are explicitly noted.",
+  "Rapportage": "Reporting",
+  "De PDF maakt van de meting een korte, bespreekbare onderzoeksoutput.": "The PDF turns the measurement into a short research output that can be discussed.",
+  "Die output verwerken leerlingen tot een behapbare poster.": "Students process that output into a manageable poster.",
+  "De webversie werkt met echte hardware of in demomodus. Daardoor kun je de opdracht voorbereiden, klassikaal tonen en laten oefenen zonder dat elke groep meteen een werkende sensor nodig heeft.": "The web version works with real hardware or in demo mode. This lets you prepare the assignment, show it to the class and let students practise without every group immediately needing a working sensor.",
+  "Rapport met naam, klas, grafiek, samenvatting en reflectie.": "Report with name, class, graph, summary and reflection."
+};
+  const META = {
+  "title": "Project Particulate Matter",
+  "description": "Project Particulate Matter is a measurement assignment with Arduino, HM330X sensor, WebSerial, live charts and PDF reporting."
+};
+  const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION"]);
+  const TEXT_NODES = [];
+  const ATTR_NODES = [];
+  let originalTitle = document.title;
+  let originalDescription = null;
+  const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+  function preserveOuterWhitespace(original, translated) {
+    const start = original.match(/^\s*/)?.[0] || "";
+    const end = original.match(/\s*$/)?.[0] || "";
+    return start + translated + end;
+  }
+  function collectTextNodes() {
+    if (TEXT_NODES.length) return;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent || SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        return normalize(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      TEXT_NODES.push({ node, original: node.nodeValue, key: normalize(node.nodeValue) });
+    }
+  }
+  function collectAttributes() {
+    if (ATTR_NODES.length) return;
+    document.querySelectorAll("[aria-label], [alt], [title], [placeholder]").forEach((element) => {
+      ["aria-label", "alt", "title", "placeholder"].forEach((attr) => {
+        if (element.hasAttribute(attr)) {
+          const original = element.getAttribute(attr);
+          ATTR_NODES.push({ element, attr, original, key: normalize(original) });
+        }
+      });
+    });
+  }
+  function setLanguage(language) {
+    const useEnglish = language === "en";
+    collectTextNodes();
+    collectAttributes();
+    TEXT_NODES.forEach((entry) => {
+      const translated = TRANSLATIONS[entry.key];
+      entry.node.nodeValue = useEnglish && translated ? preserveOuterWhitespace(entry.original, translated) : entry.original;
+    });
+    ATTR_NODES.forEach((entry) => {
+      const translated = TRANSLATIONS[entry.key];
+      entry.element.setAttribute(entry.attr, useEnglish && translated ? translated : entry.original);
+    });
+    document.documentElement.lang = useEnglish ? "en" : "nl-BE";
+    document.title = useEnglish && META.title ? META.title : originalTitle;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      if (originalDescription === null) originalDescription = description.getAttribute("content") || "";
+      description.setAttribute("content", useEnglish && META.description ? META.description : originalDescription);
+    }
+    document.querySelectorAll("[data-language-choice]").forEach((button) => {
+      const isActive = button.dataset.languageChoice === (useEnglish ? "en" : "nl");
+      button.classList.toggle("is-active", isActive);
+      if (isActive) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+    });
+    document.dispatchEvent(new CustomEvent("fijnstof:languagechange"));
+    try { localStorage.setItem(LANGUAGE_KEY, useEnglish ? "en" : "nl"); } catch (error) {}
+  }
+  function initLanguageToggle() {
+    try { localStorage.setItem(LANGUAGE_KEY, "en"); } catch (error) {}
+    document.dispatchEvent(new CustomEvent("landing:language-ready"));
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLanguageToggle);
+  else initLanguageToggle();
+})();
+</script>
+</body>
+</html>
